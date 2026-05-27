@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
 const { haversineDistance, bearing } = require('./utils/utils');
 
 const app = express();
@@ -9,6 +10,7 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
