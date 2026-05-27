@@ -1,0 +1,85 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #020f02;
+  color: #00ee44;
+  font-family: monospace;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  gap: 16px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 1.6rem;
+  color: #00ff66;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: rgba(0, 200, 60, 0.7);
+}
+
+.error {
+  color: #ff4444;
+}
+
+.radar-wrap {
+  position: relative;
+}
+
+canvas {
+  border: 1px solid rgba(0, 180, 0, 0.4);
+  border-radius: 50%;
+  cursor: crosshair;
+  display: block;
+}
+
+.tooltip {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 20, 0, 0.9);
+  border: 1px solid #00cc44;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  pointer-events: none;
+  color: #00ff66;
+  min-width: 150px;
+}
+
+.flight-table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 700px;
+  font-size: 0.8rem;
+}
+
+.flight-table th,
+.flight-table td {
+  border: 1px solid rgba(0, 150, 0, 0.3);
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.flight-table th {
+  color: #00ff66;
+  background: rgba(0, 60, 0, 0.5);
+}
+
+.flight-table tr:hover,
+.flight-table tr.active {
+  background: rgba(0, 100, 0, 0.3);
+  cursor: default;
+}
