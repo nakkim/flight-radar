@@ -12,10 +12,9 @@ interface Flight {
   alt_baro?: number | string
 }
 
-const CENTER_LAT = 60.1699
-const CENTER_LON = 24.9384
-const RADIUS = 250
-const API_URL = `http://localhost:3000/search?lat=${CENTER_LAT}&lon=${CENTER_LON}&radius=${RADIUS}`
+const DEFAULT_LAT = 60.1699
+const DEFAULT_LON = 24.9384
+const DEFAULT_RADIUS = 250
 
 const CANVAS_SIZE = 600
 const RADAR_RADIUS = CANVAS_SIZE / 2 - 20
@@ -29,13 +28,24 @@ function App() {
   const [hovered, setHovered] = useState<Flight | null>(null)
   const flightsRef = useRef<Flight[]>([])
 
+  const [centerLat, setCenterLat] = useState(DEFAULT_LAT)
+  const [centerLon, setCenterLon] = useState(DEFAULT_LON)
+  const [radius, setRadius] = useState(DEFAULT_RADIUS)
+
+  const [showSettings, setShowSettings] = useState(false)
+  const [draftLat, setDraftLat] = useState(String(DEFAULT_LAT))
+  const [draftLon, setDraftLon] = useState(String(DEFAULT_LON))
+  const [draftRadius, setDraftRadius] = useState(DEFAULT_RADIUS)
+  const [locating, setLocating] = useState(false)
+  const [geoError, setGeoError] = useState<string | null>(null)
+
   useEffect(() => {
     flightsRef.current = flights
   }, [flights])
 
-  const fetchFlights = async () => {
+  const fetchFlights = async (lat: number, lon: number, rad: number) => {
     try {
-      const res = await fetch(API_URL)
+      const res = await fetch(`http://localhost:3000/search?lat=${lat}&lon=${lon}&radius=${rad}`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data: Flight[] = await res.json()
       setFlights(data)
@@ -47,11 +57,57 @@ function App() {
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchFlights()
-    const interval = setInterval(fetchFlights, 5000)
-    return () => clearInterval(interval)
-  }, [])
+    let mounted = true
+    ;(async () => {
+      if (mounted) await fetchFlights(centerLat, centerLon, radius)
+    })()
+    const interval = setInterval(() => fetchFlights(centerLat, centerLon, radius), 5000)
+    return () => {
+      mounted = false
+      clearInterval(interval)
+    }
+  }, [centerLat, centerLon, radius])
+
+  const openSettings = () => {
+    setDraftLat(String(centerLat))
+    setDraftLon(String(centerLon))
+    setDraftRadius(radius)
+    setGeoError(null)
+    setShowSettings(true)
+  }
+
+  const applySettings = () => {
+    const lat = parseFloat(draftLat)
+    const lon = parseFloat(draftLon)
+    if (isNaN(lat) || isNaN(lon)) {
+      setGeoError('Invalid coordinates')
+      return
+    }
+    setCenterLat(lat)
+    setCenterLon(lon)
+    setRadius(draftRadius)
+    setShowSettings(false)
+  }
+
+  const locate = () => {
+    if (!navigator.geolocation) {
+      setGeoError('Geolocation not supported by this browser')
+      return
+    }
+    setLocating(true)
+    setGeoError(null)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setDraftLat(pos.coords.latitude.toFixed(4))
+        setDraftLon(pos.coords.longitude.toFixed(4))
+        setLocating(false)
+      },
+      (err) => {
+        setGeoError(err.message)
+        setLocating(false)
+      }
+    )
+  }
 
   // Draw radar
   useEffect(() => {
@@ -79,7 +135,7 @@ function App() {
       ctx.stroke()
 
       // Ring label (distance)
-      const ringKm = Math.round((RADIUS / RINGS) * i)
+      const ringKm = Math.round((radius / RINGS) * i)
       ctx.fillStyle = 'rgba(0, 180, 0, 0.5)'
       ctx.font = '11px monospace'
       ctx.fillText(`${ringKm}km`, cx + 4, cy - r + 14)
@@ -105,14 +161,14 @@ function App() {
 
     // Center dot
     ctx.beginPath()
-    ctx.arc(cx, cy, 4, 0, Math.PI * 2)
-    ctx.fillStyle = '#00ff00'
+    ctx.rect(cx - 5, cy - 5, 10, 10)
+    ctx.fillStyle = '#cce64e'
     ctx.fill()
 
     // Plot flights
     flights.forEach((f) => {
       const hRad = (f.heading * Math.PI) / 180
-      const distFraction = Math.min(f.distance / RADIUS, 1)
+      const distFraction = Math.min(f.distance / radius, 1)
       const fx = cx + Math.sin(hRad) * distFraction * RADAR_RADIUS
       const fy = cy - Math.cos(hRad) * distFraction * RADAR_RADIUS
 
@@ -130,7 +186,7 @@ function App() {
       ctx.font = isHovered ? 'bold 12px monospace' : '11px monospace'
       ctx.fillText(f.flight || f.r || '?', fx + 8, fy - 4)
     })
-  }, [flights, hovered])
+  }, [flights, hovered, radius])
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
@@ -143,7 +199,7 @@ function App() {
 
     const found = flightsRef.current.find((f) => {
       const hRad = (f.heading * Math.PI) / 180
-      const distFraction = Math.min(f.distance / RADIUS, 1)
+      const distFraction = Math.min(f.distance / radius, 1)
       const fx = cx + Math.sin(hRad) * distFraction * RADAR_RADIUS
       const fy = cy - Math.cos(hRad) * distFraction * RADAR_RADIUS
       return Math.hypot(mx - fx, my - fy) < 10
@@ -153,9 +209,10 @@ function App() {
 
   return (
     <div className="app">
+      <button className="settings-btn" onClick={openSettings} title="Settings">⚙</button>
       <h1>✈ Planes Radar</h1>
       <p className="subtitle">
-        Centre: {CENTER_LAT}°N {CENTER_LON}°E · Radius: {RADIUS} km
+        Centre: {centerLat}°N {centerLon}°E · Radius: {radius} km
         {lastUpdate && <> · Updated: {lastUpdate}</>}
         {error && <span className="error"> · Error: {error}</span>}
       </p>
@@ -176,11 +233,12 @@ function App() {
           </div>
         )}
       </div>
-      <table className="flight-table">
-        <thead>
-          <tr><th>Flight</th><th>Reg</th><th>Type</th><th>Distance</th><th>Heading</th></tr>
-        </thead>
-        <tbody>
+      {flights.length > 0 && (
+        <table className="flight-table">
+          <thead>
+            <tr><th>Flight</th><th>Reg</th><th>Type</th><th>Distance</th><th>Heading</th></tr>
+          </thead>
+          <tbody>
           {flights.map((f) => (
             <tr
               key={f.r}
@@ -197,9 +255,64 @@ function App() {
           ))}
         </tbody>
       </table>
+      )}
+      {showSettings && (
+        <div className="dialog-overlay" onClick={() => setShowSettings(false)}>
+          <div className="dialog" onClick={(e) => e.stopPropagation()}>
+            <h2>⚙ Settings</h2>
+
+            <div className="dialog-section">
+              <button className="radar-btn locate-btn" onClick={locate} disabled={locating}>
+                {locating ? '⟳ Locating…' : '◎ Use My Location'}
+              </button>
+            </div>
+
+            <div className="dialog-section">
+              <label>Latitude</label>
+              <input
+                className="radar-input"
+                type="number"
+                value={draftLat}
+                onChange={(e) => setDraftLat(e.target.value)}
+                step="0.0001"
+              />
+              <label>Longitude</label>
+              <input
+                className="radar-input"
+                type="number"
+                value={draftLon}
+                onChange={(e) => setDraftLon(e.target.value)}
+                step="0.0001"
+              />
+            </div>
+
+            <div className="dialog-section">
+              <label>Radius: <span className="radius-value">{draftRadius} km</span></label>
+              <input
+                className="radar-slider"
+                type="range"
+                min={10}
+                max={250}
+                value={draftRadius}
+                onChange={(e) => setDraftRadius(Number(e.target.value))}
+              />
+              <div className="slider-labels">
+                <span>10 km</span>
+                <span>250 km</span>
+              </div>
+            </div>
+
+            {geoError && <p className="error dialog-error">{geoError}</p>}
+
+            <div className="dialog-actions">
+              <button className="radar-btn" onClick={() => setShowSettings(false)}>Cancel</button>
+              <button className="radar-btn radar-btn-primary" onClick={applySettings}>Apply</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 export default App
-
