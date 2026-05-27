@@ -32,10 +32,6 @@ A small Node.js/Express backend API that fetches nearby aircraft from an upstrea
         └── utils.test.js
 ```
 
-## Prerequisites
-
-- Node.js 18+ (recommended)
-
 ## Installation
 
 ```bash
@@ -52,20 +48,6 @@ npm install
 
 ```bash
 npm run dev
-```
-
-Server starts at:
-
-```text
-http://localhost:3000
-```
-
-You can change the port with the `PORT` environment variable.
-
-Example:
-
-```bash
-PORT=4000 npm start
 ```
 
 ## API Endpoints
@@ -147,19 +129,6 @@ Example `502` response:
 ```json
 { "error": "Failed to reach upstream API", "details": "..." }
 ```
-
-## Testing
-
-Run unit tests:
-
-```bash
-npm test
-```
-
-Current tests cover:
-
-- Haversine distance behavior and known distances
-- Bearing cardinal directions and range
 
 ## License
 
