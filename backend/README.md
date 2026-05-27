@@ -13,36 +13,11 @@ A small Node.js/Express backend API that fetches nearby aircraft from an upstrea
 - Upstream error handling (`502` for upstream failures)
 - Unit tests for geospatial utility functions
 
-## Tech Stack
-
-- Node.js
-- Express
-- Morgan (request logging in non-production)
-- Jest (tests)
-
-## Project Structure
-
-```text
-.
-├── package.json
-└── src
-    ├── app.js
-    └── utils
-        ├── utils.js
-        └── utils.test.js
-```
-
 ## Installation
 
 ```bash
 npm install
 ```
-
-## Available Scripts
-
-- `npm start` runs the server with Node
-- `npm run dev` runs the server with Nodemon
-- `npm test` runs Jest tests
 
 ## Running Locally
 
