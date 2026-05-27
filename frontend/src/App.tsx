@@ -26,6 +26,7 @@ function App() {
   const [error, setError] = useState<string | null>(null)
   const [lastUpdate, setLastUpdate] = useState<string>('')
   const [hovered, setHovered] = useState<Flight | null>(null)
+  const [hoveredPos, setHoveredPos] = useState<{ x: number; y: number } | null>(null)
   const flightsRef = useRef<Flight[]>([])
 
   const [centerLat, setCenterLat] = useState(DEFAULT_LAT)
@@ -197,14 +198,23 @@ function App() {
     const cx = CANVAS_SIZE / 2
     const cy = CANVAS_SIZE / 2
 
-    const found = flightsRef.current.find((f) => {
+    let foundFlight: Flight | null = null
+    let foundPos: { x: number; y: number } | null = null
+
+    for (const f of flightsRef.current) {
       const hRad = (f.heading * Math.PI) / 180
       const distFraction = Math.min(f.distance / radius, 1)
       const fx = cx + Math.sin(hRad) * distFraction * RADAR_RADIUS
       const fy = cy - Math.cos(hRad) * distFraction * RADAR_RADIUS
-      return Math.hypot(mx - fx, my - fy) < 10
-    })
-    setHovered(found ?? null)
+      if (Math.hypot(mx - fx, my - fy) < 10) {
+        foundFlight = f
+        foundPos = { x: fx, y: fy }
+        break
+      }
+    }
+
+    setHovered(foundFlight)
+    setHoveredPos(foundPos)
   }
 
   return (
@@ -222,16 +232,27 @@ function App() {
           width={CANVAS_SIZE}
           height={CANVAS_SIZE}
           onMouseMove={handleMouseMove}
-          onMouseLeave={() => setHovered(null)}
+          onMouseLeave={() => { setHovered(null); setHoveredPos(null) }}
         />
-        {hovered && (
-          <div className="tooltip">
-            <strong>{hovered.flight || '—'}</strong><br />
-            {hovered.desc || '—'}<br />
-            Reg: {hovered.r || '—'}<br />
-            {hovered.distance} km · {hovered.heading}°
-          </div>
-        )}
+        {hovered && hoveredPos && (() => {
+          const offset = 12
+          const onRight = hoveredPos.x <= CANVAS_SIZE / 2
+          return (
+            <div
+              className="tooltip"
+              style={onRight
+                ? { left: hoveredPos.x + offset, top: hoveredPos.y - offset }
+                : { right: CANVAS_SIZE - hoveredPos.x + offset, top: hoveredPos.y - offset }
+              }
+            >
+              <strong>{hovered.flight || '—'}</strong><br />
+              {hovered.desc || '—'}<br />
+              Reg: {hovered.r || '—'}<br />
+              Distance: {hovered.distance} km <br />
+              Heading: {hovered.heading}°
+            </div>
+          )
+        })()}
       </div>
       {flights.length > 0 && (
         <table className="flight-table">

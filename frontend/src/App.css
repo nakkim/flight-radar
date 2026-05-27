@@ -48,8 +48,6 @@ canvas {
 
 .tooltip {
   position: absolute;
-  top: 12px;
-  right: 12px;
   background: rgba(0, 20, 0, 0.9);
   border: 1px solid #00cc44;
   padding: 8px 12px;
