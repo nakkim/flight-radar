@@ -71,6 +71,7 @@ app.get('/search', async (req, res) => {
         heading: Math.round(bearing(parsedLat, parsedLon, lat, lon)),
       }))
       .filter(f => f.distance <= parsedRadius)
+      .filter(f => f.r  !== 'TWR')
       .sort((a, b) => a.distance - b.distance);
     res.json(flights);
   } catch (err) {
