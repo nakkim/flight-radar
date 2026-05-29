@@ -56,12 +56,13 @@ app.get('/search', async (req, res) => {
     const data = await response.json();
     const flights = (data.ac || [])
       .filter(({ lat, lon, ias, tas }) => lat != null && lon != null)
-      .map(({ lat, lon, r, desc, flight, true_heading, ias, tas, alt_baro, alt_geo, mag_heading }) => ({
+      .map(({ lat, lon, r, desc, flight, true_heading, ias, track, tas, alt_baro, alt_geo, mag_heading }) => ({
         lat,
         lon,
         r,
         desc,
         true_heading,
+        track,
         ias,
         tas,
         alt_baro,

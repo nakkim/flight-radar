@@ -12,6 +12,7 @@ interface Flight {
   heading: number;
   mag_heading: number;
   true_heading: number;
+  track: number;
   alt_baro?: number | string;
 }
 
@@ -104,7 +105,7 @@ const App = () => {
     })();
     const interval = setInterval(
       () => fetchFlights(centerLat, centerLon, radius),
-      1000
+      5000
     );
     return () => {
       mounted = false;
@@ -264,7 +265,7 @@ const App = () => {
       // Aircraft symbol rotated to true heading
       ctx.save();
       ctx.translate(fx, fy);
-      ctx.rotate((f.true_heading * Math.PI) / 180);
+      ctx.rotate(((f.true_heading ?? f.track) * Math.PI) / 180);
       ctx.scale(scale, scale);
       ctx.fillStyle = color;
       ctx.strokeStyle = color;
