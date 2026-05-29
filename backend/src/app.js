@@ -73,6 +73,7 @@ app.get('/search', async (req, res) => {
       }))
       .filter(f => f.distance <= parsedRadius)
       .filter(f => f.r !== 'TWR')
+      .filter(f => f.r)
       .sort((a, b) => a.distance - b.distance);
     res.json(flights);
   } catch (err) {
