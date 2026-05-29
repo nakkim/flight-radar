@@ -15,9 +15,15 @@ interface Flight {
   alt_baro?: number | string;
 }
 
-const DEFAULT_LAT = 60.1699;
-const DEFAULT_LON = 24.9384;
-const DEFAULT_RADIUS = 250;
+const DEFAULT_LAT = localStorage.getItem("DEFAULT_LAT")
+  ? parseFloat(localStorage.getItem("DEFAULT_LAT")!)
+  : 60.1699;
+const DEFAULT_LON = localStorage.getItem("DEFAULT_LON")
+  ? parseFloat(localStorage.getItem("DEFAULT_LON")!)
+  : 24.9384;
+const DEFAULT_RADIUS = localStorage.getItem("DEFAULT_RADIUS")
+  ? parseFloat(localStorage.getItem("DEFAULT_RADIUS")!)
+  : 250;
 
 const CANVAS_SIZE = 600;
 const RADAR_RADIUS = CANVAS_SIZE / 2 - 20;
@@ -98,7 +104,7 @@ const App = () => {
     })();
     const interval = setInterval(
       () => fetchFlights(centerLat, centerLon, radius),
-      5000
+      1000
     );
     return () => {
       mounted = false;
@@ -121,6 +127,9 @@ const App = () => {
       setGeoError("Invalid coordinates");
       return;
     }
+    localStorage.setItem("DEFAULT_LAT", String(lat));
+    localStorage.setItem("DEFAULT_LON", String(lon));
+    localStorage.setItem("DEFAULT_RADIUS", String(draftRadius));
     setCenterLat(lat);
     setCenterLon(lon);
     setRadius(draftRadius);
@@ -366,7 +375,7 @@ const App = () => {
                 Reg: {hovered.r || "—"}
                 <br />
                 Distance: {hovered.distance} km <br />
-                Heading: {hovered.heading}°
+                Bearing: {hovered.heading}°
               </div>
             );
           })()}
@@ -379,7 +388,7 @@ const App = () => {
               <th>Reg</th>
               <th>Type</th>
               <th>Distance</th>
-              <th>Heading</th>
+              <th>Bearing</th>
             </tr>
           </thead>
           <tbody>
