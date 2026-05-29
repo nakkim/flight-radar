@@ -56,7 +56,7 @@ app.get('/search', async (req, res) => {
     const data = await response.json();
     const flights = (data.ac || [])
       .filter(({ lat, lon, ias, tas }) => lat != null && lon != null)
-      .map(({ lat, lon, r, desc, flight, true_heading, ias, tas, alt_baro, alt_geo }) => ({
+      .map(({ lat, lon, r, desc, flight, true_heading, ias, tas, alt_baro, alt_geo, mag_heading }) => ({
         lat,
         lon,
         r,
@@ -69,9 +69,10 @@ app.get('/search', async (req, res) => {
         flight: flight ? flight.trim() : flight,
         distance: Math.round(haversineDistance(parsedLat, parsedLon, lat, lon) * 10) / 10,
         heading: Math.round(bearing(parsedLat, parsedLon, lat, lon)),
+        mag_heading,
       }))
       .filter(f => f.distance <= parsedRadius)
-      .filter(f => f.r  !== 'TWR')
+      .filter(f => f.r !== 'TWR')
       .sort((a, b) => a.distance - b.distance);
     res.json(flights);
   } catch (err) {

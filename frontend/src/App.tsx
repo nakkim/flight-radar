@@ -10,6 +10,8 @@ interface Flight {
   flight: string | null;
   distance: number;
   heading: number;
+  mag_heading: number;
+  true_heading: number;
   alt_baro?: number | string;
 }
 
@@ -247,16 +249,38 @@ const App = () => {
 
       const isHovered = hovered?.r === f.r;
       const isAirborne = typeof f.alt_baro === "number";
+      const color = isHovered ? "#ffffff" : isAirborne ? "#00ff44" : "#ff4444";
+      const scale = isHovered ? 1.4 : 1;
 
-      // Blip
+      // Aircraft symbol rotated to true heading
+      ctx.save();
+      ctx.translate(fx, fy);
+      ctx.rotate((f.true_heading * Math.PI) / 180);
+      ctx.scale(scale, scale);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(fx, fy, isHovered ? 7 : 5, 0, Math.PI * 2);
-      ctx.fillStyle = isHovered
-        ? "#ffffff"
-        : isAirborne
-        ? "#00ff44"
-        : "#ff4444";
+      // Fuselage (nose up = negative y)
+      ctx.moveTo(0, -8);
+      ctx.lineTo(1.5, -2);
+      // Right wing
+      ctx.lineTo(8, 2);
+      ctx.lineTo(7, 4);
+      ctx.lineTo(1.5, 2);
+      // Right tail fin
+      ctx.lineTo(2.5, 8);
+      ctx.lineTo(0, 7);
+      // Left tail fin
+      ctx.lineTo(-2.5, 8);
+      ctx.lineTo(-1.5, 2);
+      // Left wing
+      ctx.lineTo(-7, 4);
+      ctx.lineTo(-8, 2);
+      ctx.lineTo(-1.5, -2);
+      ctx.closePath();
       ctx.fill();
+      ctx.restore();
 
       // Label
       ctx.fillStyle = isHovered ? "#ffffff" : "#00dd33";
