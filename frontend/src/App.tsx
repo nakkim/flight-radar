@@ -41,6 +41,7 @@ const SHOW_TABLE =
 
 const App = () => {
   const flightsRef = useRef<Flight[]>([]);
+  const hoveredRef = useRef<Flight | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [flights, setFlights] = useState<Flight[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -91,6 +92,10 @@ const App = () => {
     flightsRef.current = flights;
   }, [flights]);
 
+  useEffect(() => {
+    hoveredRef.current = hovered;
+  }, [hovered]);
+
   const fetchFlights = async (lat: number, lon: number, rad: number) => {
     try {
       const res = await fetch(
@@ -99,6 +104,10 @@ const App = () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: Flight[] = await res.json();
       setFlights(data);
+      if (hoveredRef.current) {
+        const updated = data.find((f) => f.r === hoveredRef.current!.r);
+        setHovered(updated ?? null);
+      }
       setLastUpdate(new Date().toLocaleTimeString());
       setError(null);
     } catch (e: unknown) {

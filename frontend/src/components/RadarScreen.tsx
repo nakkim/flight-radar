@@ -38,9 +38,13 @@ const RadarScreen: React.FC<IProps> = ({
           const onRight = hoveredPos.x <= CANVAS_SIZE / 2;
           const baroRate = Number(hovered.baro_rate);
           const verticalTrend =
-            Number.isFinite(baroRate) && baroRate > 0
+            Number.isFinite(baroRate) &&
+            baroRate > 0 &&
+            Math.abs(baroRate) > 100
               ? "▲ "
-              : Number.isFinite(baroRate) && baroRate < 0
+              : Number.isFinite(baroRate) &&
+                baroRate < 0 &&
+                Math.abs(baroRate) > 100
               ? "▼ "
               : "";
           return (
@@ -72,8 +76,8 @@ const RadarScreen: React.FC<IProps> = ({
               TAS: {hovered.tas ?? "—"} {hovered.tas ? "kt" : ""} <br />
               Distance: {hovered.distance ?? "—"} {hovered.distance ? "km" : ""}{" "}
               <br />
-              Bearing: {hovered.heading ?? "—"} {hovered.heading ? "°" : ""}{" "}
-              <br />
+              Bearing: {hovered.heading ?? "—"}
+              {hovered.heading ? "°" : ""} <br />
             </div>
           );
         })()}
