@@ -22,6 +22,12 @@ export interface Flight {
   tas: number;
 }
 
+export interface FlightRoute {
+  origin: string | null;
+  destination: string | null;
+  routeText: string | null;
+}
+
 const DEFAULT_LAT = localStorage.getItem("DEFAULT_LAT")
   ? parseFloat(localStorage.getItem("DEFAULT_LAT")!)
   : 60.1699;
@@ -60,6 +66,8 @@ const App = () => {
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [showTable, setShowTable] = useState(SHOW_TABLE);
+  const routeCacheRef = useRef<Map<string, FlightRoute>>(new Map());
+  const [hoveredRoute, setHoveredRoute] = useState<FlightRoute | null>(null);
 
   const [coastlineSegments, setCoastlineSegments] = useState<
     [number, number][][]
@@ -95,6 +103,33 @@ const App = () => {
   useEffect(() => {
     hoveredRef.current = hovered;
   }, [hovered]);
+
+  useEffect(() => {
+    if (!hovered?.r) {
+      // TODO Fix this
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setHoveredRoute(null);
+      return;
+    }
+    const ident = hovered.r.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+    const cached = routeCacheRef.current.get(ident);
+    if (cached) {
+      setHoveredRoute(cached);
+      return;
+    }
+    setHoveredRoute(null);
+    fetch(`http://localhost:3000/flight-info/${ident}`)
+      .then((r) => r.json())
+      .then((data: FlightRoute) => {
+        routeCacheRef.current.set(ident, data);
+        if (hoveredRef.current?.r === hovered.r) {
+          setHoveredRoute(data);
+        }
+      })
+      .catch(() => {
+        /* silently ignore */
+      });
+  }, [hovered?.r]);
 
   const fetchFlights = async (lat: number, lon: number, rad: number) => {
     try {
@@ -358,6 +393,7 @@ const App = () => {
       <RadarScreen
         hovered={hovered}
         hoveredPos={hoveredPos}
+        hoveredRoute={hoveredRoute}
         canvasRef={canvasRef}
         handleMouseMove={handleMouseMove}
         setHovered={setHovered}

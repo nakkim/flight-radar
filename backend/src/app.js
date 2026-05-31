@@ -84,6 +84,44 @@ app.get('/search', async (req, res) => {
   }
 });
 
+// Simple in-memory cache: ident -> { origin, destination, routeText, cachedAt }
+const flightInfoCache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+app.get('/flight-info/:ident', async (req, res) => {
+  const ident = req.params.ident.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+
+  const cached = flightInfoCache.get(ident);
+  if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
+    return res.json(cached.data);
+  }
+
+  try {
+    const response = await fetch(`https://uk.flightaware.com/live/flight/${ident}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+    });
+    if (!response.ok) {
+      return res.status(502).json({ error: `FlightAware error: ${response.status}` });
+    }
+    const html = await response.text();
+
+    const originMatch = html.match(/<meta\s+name="origin"\s+content="([^"]+)"/);
+    const destinationMatch = html.match(/<meta\s+name="destination"\s+content="([^"]+)"/);
+    const routeTextMatch = html.match(/<meta\s+name="twitter:description"\s+content="Track [^"]+ flight from ([^"]+)"/);
+
+    const data = {
+      origin: originMatch ? originMatch[1] : null,
+      destination: destinationMatch ? destinationMatch[1] : null,
+      routeText: routeTextMatch ? routeTextMatch[1] : null,
+    };
+
+    flightInfoCache.set(ident, { data, cachedAt: Date.now() });
+    res.json(data);
+  } catch (err) {
+    res.status(502).json({ error: 'Failed to fetch flight info', details: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

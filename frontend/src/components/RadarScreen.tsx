@@ -1,8 +1,10 @@
 import type { Flight } from "../App";
+import type { FlightRoute } from "../App";
 
 interface IProps {
   hovered: Flight | null;
   hoveredPos: { x: number; y: number } | null;
+  hoveredRoute: FlightRoute | null;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   handleMouseMove: (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void;
   setHovered: (flight: Flight | null) => void;
@@ -13,6 +15,7 @@ interface IProps {
 const RadarScreen: React.FC<IProps> = ({
   hovered,
   hoveredPos,
+  hoveredRoute,
   canvasRef,
   handleMouseMove,
   setHovered,
@@ -68,6 +71,27 @@ const RadarScreen: React.FC<IProps> = ({
               <br />
               {hovered.desc || "—"}
               <br />
+              {hoveredRoute && hoveredRoute.origin ? (
+                <>
+                  Origin: {hoveredRoute.origin}
+                  <br />
+                </>
+              ) : null}
+              {hoveredRoute && hoveredRoute.destination ? (
+                <>
+                  Destination: {hoveredRoute.destination}
+                  <br />
+                </>
+              ) : null}
+              {hoveredRoute &&
+              hoveredRoute.routeText &&
+              hoveredRoute.origin &&
+              hoveredRoute.destination ? (
+                <>
+                  Route: {hoveredRoute.routeText}
+                  <br />
+                </>
+              ) : null}
               Altitude:{" "}
               {hovered.alt_baro === "ground" ? "ground" : verticalTrend}
               {hovered.alt_baro === "ground" ? "" : `${hovered.alt_baro} ft`}
