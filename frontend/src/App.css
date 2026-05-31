@@ -106,6 +106,21 @@ canvas {
   font-size: 2.8rem;
 }
 
+.expand-btn {
+  font-family: monospace;
+  background: none;
+  border: 1px solid black;
+  color: rgba(0, 200, 60, 0.7);
+  height: 42px;
+  cursor: pointer;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.expand-btn:hover {
+  color: white;
+}
+
 /* Dialog overlay */
 .dialog-overlay {
   position: fixed;
@@ -114,7 +129,7 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: 300;
 }
 
 .dialog {
@@ -231,4 +246,3 @@ canvas {
 .dialog-error {
   font-size: 0.8rem;
 }
-

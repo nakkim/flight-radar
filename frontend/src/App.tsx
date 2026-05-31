@@ -36,6 +36,9 @@ const CANVAS_SIZE = 600;
 const RADAR_RADIUS = CANVAS_SIZE / 2 - 20;
 const RINGS = 4;
 
+const SHOW_TABLE =
+  localStorage.getItem("SHOW_TABLE") === "false" ? false : true;
+
 const App = () => {
   const flightsRef = useRef<Flight[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -55,6 +58,7 @@ const App = () => {
   const [draftRadius, setDraftRadius] = useState(DEFAULT_RADIUS);
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
+  const [showTable, setShowTable] = useState(SHOW_TABLE);
 
   const [coastlineSegments, setCoastlineSegments] = useState<
     [number, number][][]
@@ -351,7 +355,17 @@ const App = () => {
         setHoveredPos={setHoveredPos}
         CANVAS_SIZE={CANVAS_SIZE}
       />
-      {flights.length > 0 && (
+      <button
+        className="expand-btn"
+        title="Expand flights table"
+        onClick={() => {
+          localStorage.setItem("SHOW_TABLE", String(!showTable));
+          setShowTable(!showTable);
+        }}
+      >
+        {showTable ? "▲ Show all flights" : "▼ Show all flights"}
+      </button>
+      {showTable && flights.length > 0 && (
         <FlightsTable
           flights={flights}
           hovered={hovered}
