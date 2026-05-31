@@ -16,7 +16,7 @@ export interface Flight {
   mag_heading: number;
   true_heading: number;
   track: number;
-  alt_baro: number;
+  alt_baro: number | "ground";
   baro_rate: number;
   ias: number;
   tas: number;

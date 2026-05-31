@@ -64,13 +64,16 @@ const RadarScreen: React.FC<IProps> = ({
               <br />
               {hovered.desc || "—"}
               <br />
-              Altitude: {verticalTrend}
-              {hovered.alt_baro} ft
+              Altitude:{" "}
+              {hovered.alt_baro === "ground" ? "ground" : verticalTrend}
+              {hovered.alt_baro === "ground" ? "" : `${hovered.alt_baro} ft`}
               <br />
-              IAS: {hovered.ias} kt <br />
-              TAS: {hovered.tas} kt <br />
-              Distance: {hovered.distance} km <br />
-              Bearing: {hovered.heading}°
+              IAS: {hovered.ias ?? "—"} {hovered.ias ? "kt" : ""} <br />
+              TAS: {hovered.tas ?? "—"} {hovered.tas ? "kt" : ""} <br />
+              Distance: {hovered.distance ?? "—"} {hovered.distance ? "km" : ""}{" "}
+              <br />
+              Bearing: {hovered.heading ?? "—"} {hovered.heading ? "°" : ""}{" "}
+              <br />
             </div>
           );
         })()}
