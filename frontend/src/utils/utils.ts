@@ -48,4 +48,18 @@ const geoToCanvas = (
   };
 };
 
-export { haversineKm, bearingRad, geoToCanvas };
+const decodeHTMLEntities = (text: string): string => {
+  const entities: { [key: string]: string } = {
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&quot;": '"',
+    "&#39;": "'",
+  };
+  return text.replace(
+    /&amp;|&lt;|&gt;|&quot;|&#39;/g,
+    (match) => entities[match]
+  );
+};
+
+export { haversineKm, bearingRad, geoToCanvas, decodeHTMLEntities };

@@ -1,5 +1,6 @@
 import type { Flight } from "../App";
 import type { FlightRoute } from "../App";
+import { decodeHTMLEntities } from "../utils/utils";
 
 interface IProps {
   hovered: Flight | null;
@@ -88,7 +89,7 @@ const RadarScreen: React.FC<IProps> = ({
               hoveredRoute.origin &&
               hoveredRoute.destination ? (
                 <>
-                  Route: {hoveredRoute.routeText}
+                  Route: {decodeHTMLEntities(hoveredRoute.routeText)}
                   <br />
                 </>
               ) : null}
