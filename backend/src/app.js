@@ -86,7 +86,7 @@ app.get('/search', async (req, res) => {
 
 // Simple in-memory cache: ident -> { origin, destination, routeText, cachedAt }
 const flightInfoCache = new Map();
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 app.get('/flight-info/:ident', async (req, res) => {
   const ident = req.params.ident.replace(/[^A-Z0-9]/gi, '').toUpperCase();
