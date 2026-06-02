@@ -5,6 +5,9 @@ import SettingsDialog from "./components/SettingsDialog";
 import FlightsTable from "./components/FlightsTable";
 import RadarScreen from "./components/RadarScreen";
 import useFlightTrail from "./hooks/useFlightTrail";
+import useFlightRoute from "./hooks/useFlightRoute";
+import useCoastlineSegments from "./hooks/useCoastLineSegments";
+import useFlights from "./hooks/useFlights";
 
 export interface Flight {
   lat: number;
@@ -39,6 +42,8 @@ const DEFAULT_RADIUS = localStorage.getItem("DEFAULT_RADIUS")
   ? parseFloat(localStorage.getItem("DEFAULT_RADIUS")!)
   : 250;
 
+export const POLL_INTERVAL_MS = 5000;
+
 const CANVAS_SIZE = 600;
 const RADAR_RADIUS = CANVAS_SIZE / 2 - 20;
 const RINGS = 4;
@@ -47,13 +52,9 @@ const SHOW_TABLE =
   localStorage.getItem("SHOW_TABLE") === "false" ? false : true;
 
 const App = () => {
-  const flightsRef = useRef<Flight[]>([]);
   const hoveredRef = useRef<Flight | null>(null);
   const selectedRef = useRef<Flight | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [flights, setFlights] = useState<Flight[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdate, setLastUpdate] = useState<string>("");
   const [hovered, setHovered] = useState<Flight | null>(null);
   const [selected, setSelected] = useState<Flight | null>(null);
   const [hoveredPos, setHoveredPos] = useState<{ x: number; y: number } | null>(
@@ -69,40 +70,37 @@ const App = () => {
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [showTable, setShowTable] = useState(SHOW_TABLE);
-  const routeCacheRef = useRef<Map<string, FlightRoute>>(new Map());
-  const [hoveredRoute, setHoveredRoute] = useState<FlightRoute | null>(null);
+  const hoveredRoute = useFlightRoute(hovered, selected);
 
-  const [coastlineSegments, setCoastlineSegments] = useState<
-    [number, number][][]
-  >([]);
-
+  const coastlineSegments = useCoastlineSegments();
   const flightTrailRef = useFlightTrail(selected);
 
-  useEffect(() => {
-    fetch("/ne_10m_coastline.geojson")
-      .then((r) => r.json())
-      .then((geojson) => {
-        const segments: [number, number][][] = [];
-        for (const feature of geojson.features) {
-          const { type, coordinates } = feature.geometry;
-          if (type === "LineString") {
-            segments.push(coordinates as [number, number][]);
-          } else if (type === "MultiLineString") {
-            for (const line of coordinates as [number, number][][]) {
-              segments.push(line);
-            }
-          } else if (type === "Polygon") {
-            for (const ring of coordinates as [number, number][][]) {
-              segments.push(ring);
-            }
-          }
-        }
-        setCoastlineSegments(segments);
-      });
-  }, []);
+  const { flights, flightsRef, error, lastUpdate, refetch } = useFlights(
+    centerLat,
+    centerLon,
+    radius
+  );
 
   useEffect(() => {
-    flightsRef.current = flights;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHovered((currentHovered) => {
+      if (!currentHovered) return null;
+
+      const updated = flights.find((f) => f.r === currentHovered.r);
+
+      return updated ?? null;
+    });
+  }, [flights]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelected((currentSelected) => {
+      if (!currentSelected) return null;
+
+      const updated = flights.find((f) => f.r === currentSelected.r);
+
+      return updated ?? null;
+    });
   }, [flights]);
 
   useEffect(() => {
@@ -114,82 +112,18 @@ const App = () => {
   }, [selected]);
 
   useEffect(() => {
-    if (!hovered?.r && !selected?.r) {
-      // TODO Fix this
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setHoveredRoute(null);
-      return;
-    }
-    const activeR = hovered?.r ?? selected?.r;
-    const ident = activeR!.replace(/[^A-Z0-9]/gi, "").toUpperCase();
-    const cached = routeCacheRef.current.get(ident);
-    if (cached) {
-      setHoveredRoute(cached);
-      return;
-    }
-    setHoveredRoute(null);
-    fetch(`http://localhost:3000/flight-info/${ident}`)
-      .then((r) => r.json())
-      .then((data: FlightRoute) => {
-        routeCacheRef.current.set(ident, data);
-        if (
-          hoveredRef.current?.r === activeR ||
-          selectedRef.current?.r === activeR
-        ) {
-          setHoveredRoute(data);
-        }
-      })
-      .catch(() => {
-        /* silently ignore */
-      });
-  }, [hovered?.r, selected?.r]);
-
-  const fetchFlights = async (lat: number, lon: number, rad: number) => {
-    try {
-      const res = await fetch(
-        `http://localhost:3000/search?lat=${lat}&lon=${lon}&radius=${rad}`
-      );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: Flight[] = await res.json();
-      setFlights(data);
-      if (hoveredRef.current) {
-        const updated = data.find((f) => f.r === hoveredRef.current!.r);
-        setHovered(updated ?? null);
-      }
-      if (selectedRef.current) {
-        const updated = data.find((f) => f.r === selectedRef.current!.r);
-        if (updated) {
-          const trail = flightTrailRef.current.get(updated.r) ?? [];
-          const last = trail[trail.length - 1];
-          if (!last || last[0] !== updated.lat || last[1] !== updated.lon) {
-            flightTrailRef.current.set(updated.r, [
-              ...trail,
-              [updated.lat, updated.lon],
-            ]);
-          }
-        }
-        setSelected(updated ?? null);
-      }
-      setLastUpdate(new Date().toLocaleTimeString());
-      setError(null);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Fetch failed");
-    }
-  };
-
-  useEffect(() => {
     let mounted = true;
     (async () => {
-      if (mounted) await fetchFlights(centerLat, centerLon, radius);
+      if (mounted) await refetch();
     })();
-    const interval = setInterval(
-      () => fetchFlights(centerLat, centerLon, radius),
-      5000
-    );
+    const interval = setInterval(() => {
+      if (mounted) refetch();
+    }, POLL_INTERVAL_MS);
     return () => {
       mounted = false;
       clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [centerLat, centerLon, radius]);
 
   const openSettings = () => {
