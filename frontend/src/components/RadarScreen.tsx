@@ -8,6 +8,9 @@ interface IProps {
   hoveredRoute: FlightRoute | null;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   handleMouseMove: (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void;
+  handleCanvasClick: (
+    e: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+  ) => void;
   setHovered: (flight: Flight | null) => void;
   setHoveredPos: (pos: { x: number; y: number } | null) => void;
   CANVAS_SIZE: number;
@@ -19,6 +22,7 @@ const RadarScreen: React.FC<IProps> = ({
   hoveredRoute,
   canvasRef,
   handleMouseMove,
+  handleCanvasClick,
   setHovered,
   setHoveredPos,
   CANVAS_SIZE,
@@ -29,7 +33,9 @@ const RadarScreen: React.FC<IProps> = ({
         ref={canvasRef}
         width={CANVAS_SIZE}
         height={CANVAS_SIZE}
+        style={{ cursor: hovered ? "pointer" : "default" }}
         onMouseMove={handleMouseMove}
+        onClick={handleCanvasClick}
         onMouseLeave={() => {
           setHovered(null);
           setHoveredPos(null);

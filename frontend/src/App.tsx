@@ -48,11 +48,13 @@ const SHOW_TABLE =
 const App = () => {
   const flightsRef = useRef<Flight[]>([]);
   const hoveredRef = useRef<Flight | null>(null);
+  const selectedRef = useRef<Flight | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [flights, setFlights] = useState<Flight[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string>("");
   const [hovered, setHovered] = useState<Flight | null>(null);
+  const [selected, setSelected] = useState<Flight | null>(null);
   const [hoveredPos, setHoveredPos] = useState<{ x: number; y: number } | null>(
     null
   );
@@ -105,13 +107,18 @@ const App = () => {
   }, [hovered]);
 
   useEffect(() => {
-    if (!hovered?.r) {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  useEffect(() => {
+    if (!hovered?.r && !selected?.r) {
       // TODO Fix this
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setHoveredRoute(null);
       return;
     }
-    const ident = hovered.r.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+    const activeR = hovered?.r ?? selected?.r;
+    const ident = activeR!.replace(/[^A-Z0-9]/gi, "").toUpperCase();
     const cached = routeCacheRef.current.get(ident);
     if (cached) {
       setHoveredRoute(cached);
@@ -122,14 +129,14 @@ const App = () => {
       .then((r) => r.json())
       .then((data: FlightRoute) => {
         routeCacheRef.current.set(ident, data);
-        if (hoveredRef.current?.r === hovered.r) {
+        if (hoveredRef.current?.r === activeR || selectedRef.current?.r === activeR) {
           setHoveredRoute(data);
         }
       })
       .catch(() => {
         /* silently ignore */
       });
-  }, [hovered?.r]);
+  }, [hovered?.r, selected?.r]);
 
   const fetchFlights = async (lat: number, lon: number, rad: number) => {
     try {
@@ -142,6 +149,10 @@ const App = () => {
       if (hoveredRef.current) {
         const updated = data.find((f) => f.r === hoveredRef.current!.r);
         setHovered(updated ?? null);
+      }
+      if (selectedRef.current) {
+        const updated = data.find((f) => f.r === selectedRef.current!.r);
+        setSelected(updated ?? null);
       }
       setLastUpdate(new Date().toLocaleTimeString());
       setError(null);
@@ -309,7 +320,7 @@ const App = () => {
       const fx = cx + Math.sin(hRad) * distFraction * RADAR_RADIUS;
       const fy = cy - Math.cos(hRad) * distFraction * RADAR_RADIUS;
 
-      const isHovered = hovered?.r === f.r;
+      const isHovered = hovered?.r === f.r || selected?.r === f.r;
       const isAirborne = typeof f.alt_baro === "number";
       const color = isHovered ? "#ffffff" : isAirborne ? "#00ff44" : "#ff4444";
       const scale = isHovered ? 1.4 : 1;
@@ -349,7 +360,25 @@ const App = () => {
       ctx.font = isHovered ? "bold 12px monospace" : "11px monospace";
       ctx.fillText(f.flight || f.r || "?", fx + 8, fy - 4);
     });
-  }, [flights, hovered, radius, coastlineSegments, centerLat, centerLon]);
+  }, [flights, hovered, selected, radius, coastlineSegments, centerLat, centerLon]);
+
+  const findFlightAtCursor = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return null;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const cx = CANVAS_SIZE / 2;
+    const cy = CANVAS_SIZE / 2;
+    for (const f of flightsRef.current) {
+      const hRad = (f.heading * Math.PI) / 180;
+      const distFraction = Math.min(f.distance / radius, 1);
+      const fx = cx + Math.sin(hRad) * distFraction * RADAR_RADIUS;
+      const fy = cy - Math.cos(hRad) * distFraction * RADAR_RADIUS;
+      if (Math.hypot(mx - fx, my - fy) < 10) return f;
+    }
+    return null;
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -379,6 +408,11 @@ const App = () => {
     setHoveredPos(foundPos);
   };
 
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const flight = findFlightAtCursor(e);
+    setSelected((prev) => (prev?.r === flight?.r ? null : flight));
+  };
+
   return (
     <div className="app">
       <button className="settings-btn" onClick={openSettings} title="Settings">
@@ -396,6 +430,7 @@ const App = () => {
         hoveredRoute={hoveredRoute}
         canvasRef={canvasRef}
         handleMouseMove={handleMouseMove}
+        handleCanvasClick={handleCanvasClick}
         setHovered={setHovered}
         setHoveredPos={setHoveredPos}
         CANVAS_SIZE={CANVAS_SIZE}
@@ -414,7 +449,9 @@ const App = () => {
         <FlightsTable
           flights={flights}
           hovered={hovered}
+          selected={selected}
           setHovered={setHovered}
+          setSelected={setSelected}
         />
       )}
       {showSettings && (
