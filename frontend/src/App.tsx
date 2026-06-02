@@ -4,6 +4,7 @@ import { geoToCanvas } from "./utils/utils";
 import SettingsDialog from "./components/SettingsDialog";
 import FlightsTable from "./components/FlightsTable";
 import RadarScreen from "./components/RadarScreen";
+import useFlightTrail from "./hooks/useFlightTrail";
 
 export interface Flight {
   lat: number;
@@ -75,6 +76,8 @@ const App = () => {
     [number, number][][]
   >([]);
 
+  const flightTrailRef = useFlightTrail(selected);
+
   useEffect(() => {
     fetch("/ne_10m_coastline.geojson")
       .then((r) => r.json())
@@ -129,7 +132,10 @@ const App = () => {
       .then((r) => r.json())
       .then((data: FlightRoute) => {
         routeCacheRef.current.set(ident, data);
-        if (hoveredRef.current?.r === activeR || selectedRef.current?.r === activeR) {
+        if (
+          hoveredRef.current?.r === activeR ||
+          selectedRef.current?.r === activeR
+        ) {
           setHoveredRoute(data);
         }
       })
@@ -152,6 +158,16 @@ const App = () => {
       }
       if (selectedRef.current) {
         const updated = data.find((f) => f.r === selectedRef.current!.r);
+        if (updated) {
+          const trail = flightTrailRef.current.get(updated.r) ?? [];
+          const last = trail[trail.length - 1];
+          if (!last || last[0] !== updated.lat || last[1] !== updated.lon) {
+            flightTrailRef.current.set(updated.r, [
+              ...trail,
+              [updated.lat, updated.lon],
+            ]);
+          }
+        }
         setSelected(updated ?? null);
       }
       setLastUpdate(new Date().toLocaleTimeString());
@@ -313,6 +329,41 @@ const App = () => {
     ctx.fillStyle = "#cce64e";
     ctx.fill();
 
+    // Draw selected flight trail
+    if (selected) {
+      const trail = flightTrailRef.current.get(selected.r);
+      if (trail && trail.length >= 2) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, RADAR_RADIUS, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        let trailStarted = false;
+        for (const [lat, lon] of trail) {
+          const { x, y } = geoToCanvas(
+            lat,
+            lon,
+            centerLat,
+            centerLon,
+            radius,
+            cx,
+            cy,
+            RADAR_RADIUS
+          );
+          if (!trailStarted) {
+            ctx.moveTo(x, y);
+            trailStarted = true;
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
     // Plot flights
     flights.forEach((f) => {
       const hRad = (f.heading * Math.PI) / 180;
@@ -360,7 +411,16 @@ const App = () => {
       ctx.font = isHovered ? "bold 12px monospace" : "11px monospace";
       ctx.fillText(f.flight || f.r || "?", fx + 8, fy - 4);
     });
-  }, [flights, hovered, selected, radius, coastlineSegments, centerLat, centerLon]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    flights,
+    hovered,
+    selected,
+    radius,
+    coastlineSegments,
+    centerLat,
+    centerLon,
+  ]);
 
   const findFlightAtCursor = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
