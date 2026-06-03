@@ -11,6 +11,8 @@ import useWindowWidth from "./hooks/useWindowWidth";
 import useDrawRadar from "./hooks/useDrawRadar";
 import { SettingsIcon } from "./assets/icons";
 
+console.log(`App version: ${APP_VERSION}`);
+
 export interface Flight {
   lat: number;
   lon: number;
@@ -80,7 +82,7 @@ const App = () => {
   );
 
   const windowWidth = useWindowWidth();
-  const CANVAS_SIZE = Math.min(600, windowWidth - 40);
+  const CANVAS_SIZE = Math.min(700, windowWidth - 40);
   const RADAR_RADIUS = CANVAS_SIZE / 2 - 20;
   const RINGS = 4;
 
@@ -246,7 +248,8 @@ const App = () => {
       </button>
       <h1>✈ Planes Radar</h1>
       <p className="subtitle">
-        Centre: {centerLat}°N {centerLon}°E · Radius: {radius} km
+        Version: v{APP_VERSION} · Centre: {centerLat}°N {centerLon}°E · Radius:{" "}
+        {radius} km
         {lastUpdate && <> · Updated: {lastUpdate}</>}
         {error && <span className="error"> · Error: {error}</span>}
       </p>
@@ -294,12 +297,15 @@ const App = () => {
           applySettings={applySettings}
           setShowSettings={setShowSettings}
           settings={{
-            lat: 0,
-            lon: 0,
-            radius: 0,
+            lat: centerLat,
+            lon: centerLon,
+            radius: radius,
           }}
         />
       )}
+      <p style={{ textAlign: "center", fontSize: "0.6rem" }}>
+        Version: v{APP_VERSION}
+      </p>
     </div>
   );
 };
