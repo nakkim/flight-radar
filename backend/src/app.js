@@ -97,30 +97,36 @@ app.get('/flight-info/:ident', async (req, res) => {
     return res.json(cached.data);
   }
 
-  try {
-    const response = await fetch(`https://uk.flightaware.com/live/flight/${ident}`, {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-    });
-    if (!response.ok) {
-      return res.status(502).json({ error: `FlightAware error: ${response.status}` });
-    }
-    const html = await response.text();
+  return res.json({
+    origin: null,
+    destination: null,
+    routeText: null,
+  });
 
-    const originMatch = html.match(/<meta\s+name="origin"\s+content="([^"]+)"/);
-    const destinationMatch = html.match(/<meta\s+name="destination"\s+content="([^"]+)"/);
-    const routeTextMatch = html.match(/<meta\s+name="twitter:description"\s+content="Track [^"]+ flight from ([^"]+)"/);
+  // try {
+  //   const response = await fetch(`https://uk.flightaware.com/live/flight/${ident}`, {
+  //     headers: { 'User-Agent': 'Mozilla/5.0' },
+  //   });
+  //   if (!response.ok) {
+  //     return res.status(502).json({ error: `FlightAware error: ${response.status}` });
+  //   }
+  //   const html = await response.text();
 
-    const data = {
-      origin: originMatch ? originMatch[1] : null,
-      destination: destinationMatch ? destinationMatch[1] : null,
-      routeText: routeTextMatch ? routeTextMatch[1] : null,
-    };
+  //   const originMatch = html.match(/<meta\s+name="origin"\s+content="([^"]+)"/);
+  //   const destinationMatch = html.match(/<meta\s+name="destination"\s+content="([^"]+)"/);
+  //   const routeTextMatch = html.match(/<meta\s+name="twitter:description"\s+content="Track [^"]+ flight from ([^"]+)"/);
 
-    flightInfoCache.set(ident, { data, cachedAt: Date.now() });
-    res.json(data);
-  } catch (err) {
-    res.status(502).json({ error: 'Failed to fetch flight info', details: err.message });
-  }
+  //   const data = {
+  //     origin: originMatch ? originMatch[1] : null,
+  //     destination: destinationMatch ? destinationMatch[1] : null,
+  //     routeText: routeTextMatch ? routeTextMatch[1] : null,
+  //   };
+
+  //   flightInfoCache.set(ident, { data, cachedAt: Date.now() });
+  //   res.json(data);
+  // } catch (err) {
+  //   res.status(502).json({ error: 'Failed to fetch flight info', details: err.message });
+  // }
 });
 
 if (require.main === module) {
