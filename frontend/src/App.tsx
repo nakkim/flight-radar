@@ -46,7 +46,7 @@ const DEFAULT_RADIUS = localStorage.getItem("DEFAULT_RADIUS")
   ? parseFloat(localStorage.getItem("DEFAULT_RADIUS")!)
   : 250;
 
-export const POLL_INTERVAL_MS = 5000;
+export const POLL_INTERVAL_MS = 10000;
 
 const SHOW_TABLE =
   localStorage.getItem("SHOW_TABLE") === "false" ? false : true;
