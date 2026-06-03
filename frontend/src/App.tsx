@@ -82,7 +82,7 @@ const App = () => {
   );
 
   const windowWidth = useWindowWidth();
-  const CANVAS_SIZE = Math.min(700, windowWidth - 40);
+  const CANVAS_SIZE = Math.min(600, windowWidth - 40);
   const RADAR_RADIUS = CANVAS_SIZE / 2 - 20;
   const RINGS = 4;
 
