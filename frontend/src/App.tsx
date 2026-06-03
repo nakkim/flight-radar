@@ -248,8 +248,7 @@ const App = () => {
       </button>
       <h1>✈ Flight Radar</h1>
       <p className="subtitle">
-        Version: v{APP_VERSION} · Centre: {centerLat}°N {centerLon}°E · Radius:{" "}
-        {radius} km
+        Centre: {centerLat}°N {centerLon}°E · Radius: {radius} km
         {lastUpdate && <> · Updated: {lastUpdate}</>}
         {error && <span className="error"> · Error: {error}</span>}
       </p>
