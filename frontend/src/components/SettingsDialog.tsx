@@ -1,5 +1,6 @@
 import React from "react";
 import "../App.css";
+import { SettingsIcon } from "../assets/icons";
 
 interface IProps {
   locate: () => void;
@@ -36,7 +37,9 @@ const SettingsDialog: React.FC<IProps> = ({
   return (
     <div className="dialog-overlay" onClick={() => setShowSettings(false)}>
       <div className="dialog" onClick={(e) => e.stopPropagation()}>
-        <h2>⚙ Settings</h2>
+        <h2>
+          <SettingsIcon width="1.05rem" height="1.05rem" /> Settings
+        </h2>
 
         <div className="dialog-section">
           <button
