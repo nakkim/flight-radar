@@ -1,4 +1,4 @@
-# Planes Radar Backend
+# Flight Radar Backend
 
 A small Node.js/Express backend API that fetches nearby aircraft from an upstream data source and enriches the results with:
 

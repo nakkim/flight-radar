@@ -246,7 +246,7 @@ const App = () => {
       <button className="settings-btn" onClick={openSettings} title="Settings">
         <SettingsIcon style={{ width: "1.6rem", height: "1.6rem" }} />
       </button>
-      <h1>✈ Planes Radar</h1>
+      <h1>✈ Flight Radar</h1>
       <p className="subtitle">
         Version: v{APP_VERSION} · Centre: {centerLat}°N {centerLon}°E · Radius:{" "}
         {radius} km

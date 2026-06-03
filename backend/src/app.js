@@ -19,6 +19,7 @@ app.get('/', (req, res) => {
     message: 'Flight Radar API',
     endpoints: {
       search: '/search?lat={lat}&lon={lon}&radius={radius}',
+      flightInfo: '/flight-info/{ident}',
     },
   });
 });
