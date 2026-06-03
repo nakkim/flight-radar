@@ -29,7 +29,7 @@ const useFlightRoute = (
 
     let cancelled = false;
 
-    fetch(`http://localhost:3000/flight-info/${ident}`)
+    fetch(`/api/flight-info/${ident}`)
       .then((r) => r.json())
       .then((data: FlightRoute) => {
         routeCacheRef.current.set(ident, data);

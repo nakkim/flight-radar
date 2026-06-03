@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "install-all": "npm install --prefix frontend && npm install --prefix backend",
+    "build": "npm run install-all && npm run build --prefix frontend"
+  },
+  "dependencies": {
+    "@vercel/node": "latest"
+  }
+}

@@ -42,7 +42,7 @@ export default function useFlights(
         radius: String(radius),
       });
 
-      const res = await fetch(`http://localhost:3000/search?${params}`, {
+      const res = await fetch(`/api/search?${params}`, {
         signal: controller.signal,
       });
 
