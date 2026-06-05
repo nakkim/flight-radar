@@ -1,14 +1,10 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
+import { defineConfig as defineVitestConfig } from "vitest/config";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineVitestConfig({
   plugins: [react(), svgr()],
-  test: {
-    environment: "jsdom",
-    globals: true,
-  },
   define: {
     APP_VERSION: JSON.stringify(process.env.npm_package_version),
   },
@@ -20,5 +16,9 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
+  },
+  test: {
+    environment: "jsdom",
+    globals: true,
   },
 });
