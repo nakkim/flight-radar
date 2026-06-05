@@ -7,13 +7,13 @@ interface IProps {
   selected: Flight | null;
   setHovered: (flight: Flight | null) => void;
   setSelected: (flight: Flight | null) => void;
+  maxWidth?: number | string;
 }
 
 const styles: Record<string, CSSProperties> = {
   table: {
     borderCollapse: "collapse",
     width: "100%",
-    maxWidth: "700px",
     fontSize: "0.8rem",
   },
   headerCell: {
@@ -42,9 +42,10 @@ const FlightsTable: React.FC<IProps> = ({
   selected,
   setHovered,
   setSelected,
+  maxWidth,
 }) => {
   return (
-    <table style={styles.table}>
+    <table style={{ ...styles.table, maxWidth: maxWidth ? maxWidth : "700px" }}>
       <thead>
         <tr>
           <th style={styles.headerCell}>Flight</th>

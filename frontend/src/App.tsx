@@ -355,6 +355,7 @@ const App = () => {
           selected={selected}
           setHovered={setHovered}
           setSelected={setSelected}
+          maxWidth={windowWidth > 700 ? "700px" : "100%"}
         />
       )}
       {showSettings && (
