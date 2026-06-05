@@ -15,6 +15,8 @@ const styles: Record<string, CSSProperties> = {
     borderCollapse: "collapse",
     width: "100%",
     fontSize: "0.8rem",
+    margin: "16px 20px",
+    maxWidth: "700px",
   },
   headerCell: {
     border: "1px solid rgba(0, 150, 0, 0.3)",
@@ -45,7 +47,12 @@ const FlightsTable: React.FC<IProps> = ({
   maxWidth,
 }) => {
   return (
-    <table style={{ ...styles.table, maxWidth: maxWidth ? maxWidth : "700px" }}>
+    <table
+      style={{
+        ...styles.table,
+        maxWidth: maxWidth ? `${maxWidth}` : "700px",
+      }}
+    >
       <thead>
         <tr>
           <th style={styles.headerCell}>Flight</th>
@@ -53,7 +60,6 @@ const FlightsTable: React.FC<IProps> = ({
           <th style={styles.headerCell}>Type</th>
           <th style={styles.headerCell}>Distance</th>
           <th style={styles.headerCell}>Heading</th>
-          <th style={styles.headerCell}>Bearing</th>
         </tr>
       </thead>
       <tbody>
@@ -75,7 +81,6 @@ const FlightsTable: React.FC<IProps> = ({
             <td style={styles.bodyCell}>{f.desc || "—"}</td>
             <td style={styles.bodyCell}>{f.distance} km</td>
             <td style={styles.bodyCell}>{f.true_heading ?? f.track}°</td>
-            <td style={styles.bodyCell}>{f.heading}°</td>
           </tr>
         ))}
       </tbody>

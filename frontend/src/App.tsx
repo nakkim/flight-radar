@@ -9,6 +9,7 @@ import useFlights from "./hooks/useFlights";
 import useWindowWidth from "./hooks/useWindowWidth";
 import useDrawRadar from "./hooks/useDrawRadar";
 import { SettingsIcon } from "./assets/icons";
+import InfoDialog from "./components/InfoDialog";
 
 console.log(`App version: ${APP_VERSION}`);
 
@@ -57,7 +58,6 @@ const styles: Record<string, CSSProperties> = {
     alignItems: "center",
     padding: "24px 16px",
     gap: "16px",
-    minHeight: "100vh",
   },
   settingsButton: {
     position: "fixed",
@@ -82,10 +82,12 @@ const styles: Record<string, CSSProperties> = {
     fontSize: "1.6rem",
     color: "#00ff66",
     letterSpacing: "2px",
+    margin: 0,
   },
   subtitle: {
     fontSize: "0.8rem",
     color: "rgba(0, 200, 60, 0.7)",
+    marginTop: "2px",
   },
   error: {
     color: "#ff4444",
@@ -101,12 +103,19 @@ const styles: Record<string, CSSProperties> = {
     padding: "0 12px",
     transition: "color 0.15s ease",
   },
-  expandButtonHover: {
+  buttonHover: {
     color: "#ffffff",
   },
   version: {
     textAlign: "center",
     fontSize: "0.6rem",
+    margin: "4px 0",
+  },
+  footer: {
+    marginTop: "auto",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   },
 };
 
@@ -130,9 +139,11 @@ const App = () => {
   const [geoError, setGeoError] = useState<string | null>(null);
   const [showTable, setShowTable] = useState(SHOW_TABLE);
   const [isSettingsButtonHovered, setIsSettingsButtonHovered] = useState(false);
-  const [isExpandButtonHovered, setIsExpandButtonHovered] = useState(false);
-  const hoveredRoute = useFlightRoute(hovered, selected);
+  const [isbuttonHovered, setIsbuttonHovered] = useState(false);
+  const [isInfoButtonHovered, setIsInfoButtonHovered] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
+  const hoveredRoute = useFlightRoute(hovered, selected);
   const coastlineSegments = useCoastlineSegments();
   const flightTrailRef = useFlightTrail(selected);
 
@@ -336,11 +347,11 @@ const App = () => {
       <button
         style={{
           ...styles.expandButton,
-          ...(isExpandButtonHovered ? styles.expandButtonHover : {}),
+          ...(isbuttonHovered ? styles.buttonHover : {}),
         }}
         title="Expand flights table"
-        onMouseEnter={() => setIsExpandButtonHovered(true)}
-        onMouseLeave={() => setIsExpandButtonHovered(false)}
+        onMouseEnter={() => setIsbuttonHovered(true)}
+        onMouseLeave={() => setIsbuttonHovered(false)}
         onClick={() => {
           localStorage.setItem("SHOW_TABLE", String(!showTable));
           setShowTable(!showTable);
@@ -378,7 +389,23 @@ const App = () => {
           }}
         />
       )}
-      <p style={styles.version}>Version: v{APP_VERSION}</p>
+      <footer style={styles.footer}>
+        <p style={styles.version}>Version: v{APP_VERSION}</p>
+        <button
+          style={{
+            ...styles.expandButton,
+            ...(isInfoButtonHovered ? styles.buttonHover : {}),
+            height: "18px",
+          }}
+          title="About this app"
+          onMouseEnter={() => setIsInfoButtonHovered(true)}
+          onMouseLeave={() => setIsInfoButtonHovered(false)}
+          onClick={() => setShowInfo(true)}
+        >
+          ℹ About
+        </button>
+      </footer>
+      {showInfo && <InfoDialog setShowInfo={setShowInfo} />}
     </div>
   );
 };
