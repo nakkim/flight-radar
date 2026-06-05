@@ -90,7 +90,7 @@ const InfoDialog: React.FC<IProps> = ({ setShowInfo }) => {
 
         <div style={styles.body}>
           <p style={styles.p}>
-            Planes Radar is a simple live aircraft tracking tool that displays
+            Flight Radar is a simple live aircraft tracking tool that displays
             flights within a configurable radius of any location on a
             radar-style map.
           </p>
