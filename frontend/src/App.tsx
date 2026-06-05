@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "react";
-import "./App.css";
+import { useState, useEffect, useRef, type CSSProperties } from "react";
 import SettingsDialog from "./components/SettingsDialog";
 import FlightsTable from "./components/FlightsTable";
 import RadarScreen from "./components/RadarScreen";
@@ -51,6 +50,66 @@ export const POLL_INTERVAL_MS = 10000;
 const SHOW_TABLE =
   localStorage.getItem("SHOW_TABLE") === "false" ? false : true;
 
+const styles: Record<string, CSSProperties> = {
+  app: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: "24px 16px",
+    gap: "16px",
+    minHeight: "100vh",
+  },
+  settingsButton: {
+    position: "fixed",
+    top: "16px",
+    right: "16px",
+    background: "none",
+    border: "none",
+    color: "#00ff66",
+    width: "42px",
+    height: "42px",
+    cursor: "pointer",
+    zIndex: 100,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "color 0.15s ease",
+  },
+  settingsButtonHover: {
+    color: "#ffffff",
+  },
+  title: {
+    fontSize: "1.6rem",
+    color: "#00ff66",
+    letterSpacing: "2px",
+  },
+  subtitle: {
+    fontSize: "0.8rem",
+    color: "rgba(0, 200, 60, 0.7)",
+  },
+  error: {
+    color: "#ff4444",
+  },
+  expandButton: {
+    fontFamily: "monospace",
+    background: "none",
+    border: "none",
+    color: "rgba(0, 200, 60, 0.7)",
+    height: "42px",
+    cursor: "pointer",
+    justifyContent: "center",
+    padding: "0 12px",
+    transition: "color 0.15s ease",
+  },
+  expandButtonHover: {
+    color: "#ffffff",
+  },
+  version: {
+    textAlign: "center",
+    fontSize: "0.6rem",
+  },
+};
+
 const App = () => {
   const hoveredRef = useRef<Flight | null>(null);
   const selectedRef = useRef<Flight | null>(null);
@@ -70,6 +129,8 @@ const App = () => {
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [showTable, setShowTable] = useState(SHOW_TABLE);
+  const [isSettingsButtonHovered, setIsSettingsButtonHovered] = useState(false);
+  const [isExpandButtonHovered, setIsExpandButtonHovered] = useState(false);
   const hoveredRoute = useFlightRoute(hovered, selected);
 
   const coastlineSegments = useCoastlineSegments();
@@ -242,15 +303,24 @@ const App = () => {
   };
 
   return (
-    <div className="app">
-      <button className="settings-btn" onClick={openSettings} title="Settings">
+    <div style={styles.app}>
+      <button
+        style={{
+          ...styles.settingsButton,
+          ...(isSettingsButtonHovered ? styles.settingsButtonHover : {}),
+        }}
+        onClick={openSettings}
+        onMouseEnter={() => setIsSettingsButtonHovered(true)}
+        onMouseLeave={() => setIsSettingsButtonHovered(false)}
+        title="Settings"
+      >
         <SettingsIcon style={{ width: "1.6rem", height: "1.6rem" }} />
       </button>
-      <h1>✈ Flight Radar</h1>
-      <p className="subtitle">
+      <h1 style={styles.title}>✈ Flight Radar</h1>
+      <p style={styles.subtitle}>
         Centre: {centerLat}°N {centerLon}°E · Radius: {radius} km
         {lastUpdate && <> · Updated: {lastUpdate}</>}
-        {error && <span className="error"> · Error: {error}</span>}
+        {error && <span style={styles.error}> · Error: {error}</span>}
       </p>
       <RadarScreen
         hovered={hovered}
@@ -264,8 +334,13 @@ const App = () => {
         CANVAS_SIZE={CANVAS_SIZE}
       />
       <button
-        className="expand-btn"
+        style={{
+          ...styles.expandButton,
+          ...(isExpandButtonHovered ? styles.expandButtonHover : {}),
+        }}
         title="Expand flights table"
+        onMouseEnter={() => setIsExpandButtonHovered(true)}
+        onMouseLeave={() => setIsExpandButtonHovered(false)}
         onClick={() => {
           localStorage.setItem("SHOW_TABLE", String(!showTable));
           setShowTable(!showTable);
@@ -302,9 +377,7 @@ const App = () => {
           }}
         />
       )}
-      <p style={{ textAlign: "center", fontSize: "0.6rem" }}>
-        Version: v{APP_VERSION}
-      </p>
+      <p style={styles.version}>Version: v{APP_VERSION}</p>
     </div>
   );
 };
