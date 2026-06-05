@@ -1,4 +1,18 @@
 {
   "editor.formatOnType": true,
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "restoreTerminals.terminals": [
+    {
+      "splitTerminals": [
+        {
+          "name": "frontend",
+          "commands": ["cd frontend", "nvm use", "npm run dev"]
+        },
+        {
+          "name": "cd backend",
+          "commands": ["cd backend", "nvm use", "npm run dev"]
+        }
+      ]
+    }
+  ]
 }
