@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
     message: 'Flight Radar API',
     endpoints: {
       search: '/search?lat={lat}&lon={lon}&radius={radius}',
-      flightInfo: '/flight-info/{ident}',
+      flightInfo: '/flight-info/{callsign}',
     },
   });
 });
@@ -85,48 +85,43 @@ app.get('/search', async (req, res) => {
   }
 });
 
-// Simple in-memory cache: ident -> { origin, destination, routeText, cachedAt }
+// Simple in-memory cache: callsign -> { origin, destination, routeText, cachedAt }
 const flightInfoCache = new Map();
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
-app.get('/flight-info/:ident', async (req, res) => {
-  const ident = req.params.ident.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+app.get('/flight-info/:callsign', async (req, res) => {
+  const callsign = req.params.callsign.replace(/[^A-Z0-9]/gi, '').toUpperCase();
 
-  const cached = flightInfoCache.get(ident);
+  const cached = flightInfoCache.get(callsign);
   if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
     return res.json(cached.data);
   }
 
-  return res.json({
-    origin: null,
-    destination: null,
-    routeText: null,
-  });
+  const data = await fetch(`https://api.adsbdb.com/v0/callsign/${callsign}`, {
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`ADS-B DB API error: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(json => {
+      const response = json.response.flightroute;
+      const origin = response.origin.icao_code || null;
+      const destination = response.destination.icao_code || null;
+      const routeText = response.origin.name && response.destination.name ? `${response.origin.name} -> ${response.destination.name}` : null;
 
-  // try {
-  //   const response = await fetch(`https://uk.flightaware.com/live/flight/${ident}`, {
-  //     headers: { 'User-Agent': 'Mozilla/5.0' },
-  //   });
-  //   if (!response.ok) {
-  //     return res.status(502).json({ error: `FlightAware error: ${response.status}` });
-  //   }
-  //   const html = await response.text();
+      const data = { origin, destination, routeText };
+      flightInfoCache.set(callsign, { data, cachedAt: Date.now() });
+      return data;
+    })
+    .catch(err => {
+      console.error(`Error fetching flight info for ${callsign}:`, err);
+      return { origin: null, destination: null, routeText: null };
+    });
 
-  //   const originMatch = html.match(/<meta\s+name="origin"\s+content="([^"]+)"/);
-  //   const destinationMatch = html.match(/<meta\s+name="destination"\s+content="([^"]+)"/);
-  //   const routeTextMatch = html.match(/<meta\s+name="twitter:description"\s+content="Track [^"]+ flight from ([^"]+)"/);
-
-  //   const data = {
-  //     origin: originMatch ? originMatch[1] : null,
-  //     destination: destinationMatch ? destinationMatch[1] : null,
-  //     routeText: routeTextMatch ? routeTextMatch[1] : null,
-  //   };
-
-  //   flightInfoCache.set(ident, { data, cachedAt: Date.now() });
-  //   res.json(data);
-  // } catch (err) {
-  //   res.status(502).json({ error: 'Failed to fetch flight info', details: err.message });
-  // }
+  return res.json(data);
 });
 
 if (require.main === module) {

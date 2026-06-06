@@ -402,7 +402,7 @@ const App = () => {
           onMouseLeave={() => setIsInfoButtonHovered(false)}
           onClick={() => setShowInfo(true)}
         >
-          ℹ About
+          About
         </button>
       </footer>
       {showInfo && <InfoDialog setShowInfo={setShowInfo} />}

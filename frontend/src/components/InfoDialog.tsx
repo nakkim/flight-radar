@@ -101,9 +101,9 @@ const InfoDialog: React.FC<IProps> = ({ setShowInfo }) => {
             radius.
           </p>
           <hr style={styles.divider} />
+          <h3 style={{ color: "#00ff66" }}>Data sources</h3>
           <p style={styles.p}>
-            <strong style={{ color: "#00ff66" }}>Data source:</strong> Flight
-            data is provided by{" "}
+            Flight data is provided by{" "}
             <a
               href="https://airplanes.live"
               target="_blank"
@@ -126,6 +126,25 @@ const InfoDialog: React.FC<IProps> = ({ setShowInfo }) => {
               Natural Earth
             </a>
             .
+          </p>
+          <p>
+            Route information is available for each flight by clicking on the
+            aircraft icon. Data is fetched from{" "}
+            <a
+              href="https://www.adsbdb.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.link}
+            >
+              www.adsbdb.com/
+            </a>
+            .
+          </p>
+          <hr style={styles.divider} />
+          <p style={styles.p}>
+            This project is open source and built for fun, without any
+            commercial intent. It is not affiliated with any airline or aviation
+            authority.
           </p>
           <p>
             Source code can be found on{" "}
