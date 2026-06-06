@@ -1,5 +1,7 @@
 import React from "react";
 import type { CSSProperties } from "react";
+import { SettingsIcon } from "../assets/icons";
+import { POLL_INTERVAL_MS } from "../App";
 
 interface IProps {
   setShowInfo: (show: boolean) => void;
@@ -8,12 +10,12 @@ interface IProps {
 const styles: Record<string, CSSProperties> = {
   overlay: {
     position: "fixed",
-    inset: 0,
     background: "rgba(0, 0, 0, 0.75)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 300,
+    maxHeight: "calc(100% - 100px)",
   },
   dialog: {
     background: "#020f02",
@@ -24,6 +26,8 @@ const styles: Record<string, CSSProperties> = {
     width: "90vw",
     display: "flex",
     flexDirection: "column",
+    overflowY: "scroll",
+    height: "80vh",
     gap: "16px",
     boxShadow: "0 0 40px rgba(0, 200, 0, 0.2)",
   },
@@ -86,7 +90,7 @@ const InfoDialog: React.FC<IProps> = ({ setShowInfo }) => {
   return (
     <div style={styles.overlay} onClick={() => setShowInfo(false)}>
       <div style={styles.dialog} onClick={(e) => e.stopPropagation()}>
-        <h2 style={styles.title}>ℹ About Planes Radar</h2>
+        <h2 style={styles.title}>About Flight Radar</h2>
 
         <div style={styles.body}>
           <p style={styles.p}>
@@ -94,11 +98,18 @@ const InfoDialog: React.FC<IProps> = ({ setShowInfo }) => {
             flights within a configurable radius of any location on a
             radar-style map.
           </p>
+          <p>
+            <span style={{ color: "#00ff66", fontWeight: "bold" }}>Green</span>{" "}
+            icons represent aircraft within the radar's range.{" "}
+            <span style={{ color: "#ff0000", fontWeight: "bold" }}>Red</span>{" "}
+            icons represent stationary aircraft on the ground.
+          </p>
           <p style={styles.p}>
             Aircraft are plotted in real time with their callsign, heading, and
             altitude. Click on any aircraft to track it and see its flight
-            trail. Use the ⚙ settings to change the centre location and radar
-            radius.
+            trail. Open the settings icon{" "}
+            <SettingsIcon style={{ width: "0.8rem", height: "0.8rem" }} /> to
+            change the centre location and radar radius.
           </p>
           <hr style={styles.divider} />
           <h3 style={{ color: "#00ff66" }}>Data sources</h3>
@@ -112,8 +123,7 @@ const InfoDialog: React.FC<IProps> = ({ setShowInfo }) => {
             >
               airplanes.live
             </a>
-            , a community-driven ADS-B aggregator network. Data is refreshed
-            every 5 seconds.
+            . Data is refreshed every {POLL_INTERVAL_MS / 1000} seconds.
           </p>
           <p style={styles.p}>
             Coastline geometry is from{" "}
