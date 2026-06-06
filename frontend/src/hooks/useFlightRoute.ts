@@ -9,7 +9,7 @@ const useFlightRoute = (
   const [route, setRoute] = useState<FlightRoute | null>(null);
 
   useEffect(() => {
-    const activeR = hovered?.r ?? selected?.r;
+    const activeR = hovered?.flight ?? selected?.flight;
 
     if (!activeR) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -46,7 +46,7 @@ const useFlightRoute = (
     return () => {
       cancelled = true;
     };
-  }, [hovered?.r, selected?.r]);
+  }, [hovered?.flight, selected?.flight]);
 
   return route;
 };
