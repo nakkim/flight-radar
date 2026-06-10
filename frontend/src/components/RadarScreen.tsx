@@ -102,27 +102,30 @@ const RadarScreen: React.FC<IProps> = ({
               <br />
               {hovered.desc || "—"}
               <br />
+              Origin:{" "}
               {hoveredRoute && hoveredRoute.origin ? (
-                <>
-                  Origin: {hoveredRoute.origin}
-                  <br />
-                </>
-              ) : null}
+                <>{hoveredRoute.origin}</>
+              ) : (
+                "-"
+              )}
+              <br />
+              Destination:{" "}
               {hoveredRoute && hoveredRoute.destination ? (
-                <>
-                  Destination: {hoveredRoute.destination}
-                  <br />
-                </>
-              ) : null}
+                <>{hoveredRoute.destination}</>
+              ) : (
+                "-"
+              )}
+              <br />
+              Route:{" "}
               {hoveredRoute &&
               hoveredRoute.routeText &&
               hoveredRoute.origin &&
               hoveredRoute.destination ? (
-                <>
-                  Route: {decodeHTMLEntities(hoveredRoute.routeText)}
-                  <br />
-                </>
-              ) : null}
+                <>{decodeHTMLEntities(hoveredRoute.routeText)}</>
+              ) : (
+                "-"
+              )}
+              <br />
               Altitude:{" "}
               {hovered.alt_baro === "ground" ? "ground" : verticalTrend}
               {hovered.alt_baro === "ground" ? "" : `${hovered.alt_baro} ft`}
