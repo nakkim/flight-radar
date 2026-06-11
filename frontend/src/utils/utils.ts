@@ -14,6 +14,14 @@ const haversineKm = (
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
+const getVerticalTrend = (baroRate: number): string => {
+  return Number.isFinite(baroRate) && baroRate > 0 && Math.abs(baroRate) > 100
+    ? "▲ "
+    : Number.isFinite(baroRate) && baroRate < 0 && Math.abs(baroRate) > 100
+    ? "▼ "
+    : "";
+};
+
 const bearingRad = (
   lat1: number,
   lon1: number,
@@ -62,4 +70,10 @@ const decodeHTMLEntities = (text: string): string => {
   );
 };
 
-export { haversineKm, bearingRad, geoToCanvas, decodeHTMLEntities };
+export {
+  haversineKm,
+  bearingRad,
+  geoToCanvas,
+  decodeHTMLEntities,
+  getVerticalTrend,
+};

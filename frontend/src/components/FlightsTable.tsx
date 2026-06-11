@@ -1,4 +1,5 @@
 import type { Flight } from "../App";
+import { getVerticalTrend } from "../utils/utils";
 
 interface IProps {
   flights: Flight[];
@@ -23,7 +24,7 @@ const FlightsTable: React.FC<IProps> = ({
           <th>Reg</th>
           <th>Type</th>
           <th>Distance</th>
-          <th>Heading</th>
+          <th>Altitude</th>
         </tr>
       </thead>
       <tbody>
@@ -42,7 +43,11 @@ const FlightsTable: React.FC<IProps> = ({
             <td>{f.r || "—"}</td>
             <td>{f.desc || "—"}</td>
             <td>{f.distance} km</td>
-            <td>{f.true_heading ?? f.track}°</td>
+            <td>
+              {f.alt_baro === "ground"
+                ? "ground"
+                : getVerticalTrend(Number(f.baro_rate)) + `${f.alt_baro} ft`}
+            </td>
           </tr>
         ))}
       </tbody>

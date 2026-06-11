@@ -1,6 +1,6 @@
 import type { Flight } from "../App";
 import type { FlightRoute } from "../App";
-import { decodeHTMLEntities } from "../utils/utils";
+import { decodeHTMLEntities, getVerticalTrend } from "../utils/utils";
 
 interface IProps {
   hovered: Flight | null;
@@ -103,8 +103,10 @@ const RadarScreen: React.FC<IProps> = ({
               )}
               <br />
               Altitude:{" "}
-              {hovered.alt_baro === "ground" ? "ground" : verticalTrend}
-              {hovered.alt_baro === "ground" ? "" : `${hovered.alt_baro} ft`}
+              {hovered.alt_baro === "ground"
+                ? "ground"
+                : getVerticalTrend(Number(hovered.baro_rate)) +
+                  `${hovered.alt_baro} ft`}
               <br />
               IAS: {hovered.ias ?? "—"} {hovered.ias ? "kt" : ""} <br />
               TAS: {hovered.tas ?? "—"} {hovered.tas ? "kt" : ""} <br />

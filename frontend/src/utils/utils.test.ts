@@ -3,6 +3,7 @@ import {
   bearingRad,
   decodeHTMLEntities,
   geoToCanvas,
+  getVerticalTrend,
   haversineKm,
 } from "./utils";
 
@@ -95,6 +96,27 @@ describe("geoToCanvas", () => {
     );
 
     expect(p.y).toBeLessThan(cy);
+  });
+});
+
+describe("getVerticalTrend", () => {
+  test("returns '▲ ' for positive baroRate > 100", () => {
+    expect(getVerticalTrend(150)).toBe("▲ ");
+  });
+
+  test("returns '▼ ' for negative baroRate < -100", () => {
+    expect(getVerticalTrend(-150)).toBe("▼ ");
+  });
+
+  test("returns '' for baroRate between -100 and 100", () => {
+    expect(getVerticalTrend(50)).toBe("");
+    expect(getVerticalTrend(-50)).toBe("");
+  });
+
+  test("returns '' for non-finite baroRate", () => {
+    expect(getVerticalTrend(NaN)).toBe("");
+    expect(getVerticalTrend(Infinity)).toBe("");
+    expect(getVerticalTrend(-Infinity)).toBe("");
   });
 });
 
