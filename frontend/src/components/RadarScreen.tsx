@@ -46,17 +46,6 @@ const RadarScreen: React.FC<IProps> = ({
         (() => {
           const offset = 12;
           const onRight = hoveredPos.x <= CANVAS_SIZE / 2;
-          const baroRate = Number(hovered.baro_rate);
-          const verticalTrend =
-            Number.isFinite(baroRate) &&
-            baroRate > 0 &&
-            Math.abs(baroRate) > 100
-              ? "▲ "
-              : Number.isFinite(baroRate) &&
-                baroRate < 0 &&
-                Math.abs(baroRate) > 100
-              ? "▼ "
-              : "";
           return (
             <div
               className="tooltip"
