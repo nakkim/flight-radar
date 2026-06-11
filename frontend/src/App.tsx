@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, type CSSProperties } from "react";
+import { useState, useEffect, useRef } from "react";
+import "./App.css";
 import SettingsDialog from "./components/SettingsDialog";
 import FlightsTable from "./components/FlightsTable";
 import RadarScreen from "./components/RadarScreen";
@@ -51,74 +52,6 @@ export const POLL_INTERVAL_MS = 10000;
 const SHOW_TABLE =
   localStorage.getItem("SHOW_TABLE") === "false" ? false : true;
 
-const styles: Record<string, CSSProperties> = {
-  app: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "24px 16px",
-    gap: "16px",
-  },
-  settingsButton: {
-    position: "fixed",
-    top: "16px",
-    right: "16px",
-    background: "none",
-    border: "none",
-    color: "#00ff66",
-    width: "42px",
-    height: "42px",
-    cursor: "pointer",
-    zIndex: 100,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "color 0.15s ease",
-  },
-  settingsButtonHover: {
-    color: "#ffffff",
-  },
-  title: {
-    fontSize: "1.6rem",
-    color: "#00ff66",
-    letterSpacing: "2px",
-    margin: 0,
-  },
-  subtitle: {
-    fontSize: "0.8rem",
-    color: "rgba(0, 200, 60, 0.7)",
-    marginTop: "2px",
-  },
-  error: {
-    color: "#ff4444",
-  },
-  expandButton: {
-    fontFamily: "monospace",
-    background: "none",
-    border: "none",
-    color: "rgba(0, 200, 60, 0.7)",
-    height: "42px",
-    cursor: "pointer",
-    justifyContent: "center",
-    padding: "0 12px",
-    transition: "color 0.15s ease",
-  },
-  buttonHover: {
-    color: "#ffffff",
-  },
-  version: {
-    textAlign: "center",
-    fontSize: "0.6rem",
-    margin: "4px 0",
-  },
-  footer: {
-    marginTop: "auto",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-};
-
 const App = () => {
   const hoveredRef = useRef<Flight | null>(null);
   const selectedRef = useRef<Flight | null>(null);
@@ -138,9 +71,6 @@ const App = () => {
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [showTable, setShowTable] = useState(SHOW_TABLE);
-  const [isSettingsButtonHovered, setIsSettingsButtonHovered] = useState(false);
-  const [isbuttonHovered, setIsbuttonHovered] = useState(false);
-  const [isInfoButtonHovered, setIsInfoButtonHovered] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
   const hoveredRoute = useFlightRoute(hovered, selected);
@@ -314,24 +244,15 @@ const App = () => {
   };
 
   return (
-    <div style={styles.app}>
-      <button
-        style={{
-          ...styles.settingsButton,
-          ...(isSettingsButtonHovered ? styles.settingsButtonHover : {}),
-        }}
-        onClick={openSettings}
-        onMouseEnter={() => setIsSettingsButtonHovered(true)}
-        onMouseLeave={() => setIsSettingsButtonHovered(false)}
-        title="Settings"
-      >
+    <div className="app">
+      <button className="settings-btn" onClick={openSettings} title="Settings">
         <SettingsIcon style={{ width: "1.6rem", height: "1.6rem" }} />
       </button>
-      <h1 style={styles.title}>✈ Flight Radar</h1>
-      <p style={styles.subtitle}>
+      <h1>✈ Flight Radar</h1>
+      <p className="subtitle">
         Centre: {centerLat}°N {centerLon}°E · Radius: {radius} km
         {lastUpdate && <> · Updated: {lastUpdate}</>}
-        {error && <span style={styles.error}> · Error: {error}</span>}
+        {error && <span className="error"> · Error: {error}</span>}
       </p>
       <RadarScreen
         hovered={hovered}
@@ -345,13 +266,8 @@ const App = () => {
         CANVAS_SIZE={CANVAS_SIZE}
       />
       <button
-        style={{
-          ...styles.expandButton,
-          ...(isbuttonHovered ? styles.buttonHover : {}),
-        }}
+        className="expand-btn"
         title="Expand flights table"
-        onMouseEnter={() => setIsbuttonHovered(true)}
-        onMouseLeave={() => setIsbuttonHovered(false)}
         onClick={() => {
           localStorage.setItem("SHOW_TABLE", String(!showTable));
           setShowTable(!showTable);
@@ -366,7 +282,6 @@ const App = () => {
           selected={selected}
           setHovered={setHovered}
           setSelected={setSelected}
-          maxWidth={windowWidth > 700 ? "700px" : "100%"}
         />
       )}
       {showSettings && (
@@ -382,24 +297,13 @@ const App = () => {
           setDraftRadius={setDraftRadius}
           applySettings={applySettings}
           setShowSettings={setShowSettings}
-          settings={{
-            lat: centerLat,
-            lon: centerLon,
-            radius: radius,
-          }}
         />
       )}
-      <footer style={styles.footer}>
-        <p style={styles.version}>Version: v{APP_VERSION}</p>
+      <footer className="footer">
+        <p className="version">Version: v{APP_VERSION}</p>
         <button
-          style={{
-            ...styles.expandButton,
-            ...(isInfoButtonHovered ? styles.buttonHover : {}),
-            height: "18px",
-          }}
+          className="expand-btn about-btn"
           title="About this app"
-          onMouseEnter={() => setIsInfoButtonHovered(true)}
-          onMouseLeave={() => setIsInfoButtonHovered(false)}
           onClick={() => setShowInfo(true)}
         >
           About

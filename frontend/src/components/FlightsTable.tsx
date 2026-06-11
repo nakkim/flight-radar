@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import type { Flight } from "../App";
 
 interface IProps {
@@ -7,36 +6,7 @@ interface IProps {
   selected: Flight | null;
   setHovered: (flight: Flight | null) => void;
   setSelected: (flight: Flight | null) => void;
-  maxWidth?: number | string;
 }
-
-const styles: Record<string, CSSProperties> = {
-  table: {
-    borderCollapse: "collapse",
-    width: "100%",
-    fontSize: "0.8rem",
-    margin: "16px 20px",
-    maxWidth: "700px",
-  },
-  headerCell: {
-    border: "1px solid rgba(0, 150, 0, 0.3)",
-    padding: "6px 10px",
-    textAlign: "left",
-    color: "#00ff66",
-    background: "rgba(0, 60, 0, 0.5)",
-  },
-  bodyCell: {
-    border: "1px solid rgba(0, 150, 0, 0.3)",
-    padding: "6px 10px",
-    textAlign: "left",
-  },
-  row: {
-    cursor: "pointer",
-  },
-  activeRow: {
-    background: "rgba(0, 100, 0, 0.3)",
-  },
-};
 
 const FlightsTable: React.FC<IProps> = ({
   flights,
@@ -44,43 +14,35 @@ const FlightsTable: React.FC<IProps> = ({
   selected,
   setHovered,
   setSelected,
-  maxWidth,
 }) => {
   return (
-    <table
-      style={{
-        ...styles.table,
-        maxWidth: maxWidth ? `${maxWidth}` : "700px",
-      }}
-    >
+    <table className="flight-table">
       <thead>
         <tr>
-          <th style={styles.headerCell}>Flight</th>
-          <th style={styles.headerCell}>Reg</th>
-          <th style={styles.headerCell}>Type</th>
-          <th style={styles.headerCell}>Distance</th>
-          <th style={styles.headerCell}>Heading</th>
+          <th>Flight</th>
+          <th>Reg</th>
+          <th>Type</th>
+          <th>Distance</th>
+          <th>Heading</th>
         </tr>
       </thead>
       <tbody>
         {flights.map((f) => (
           <tr
             key={f.r}
-            style={{
-              ...styles.row,
-              ...(selected?.r === f.r || hovered?.r === f.r
-                ? styles.activeRow
-                : {}),
-            }}
+            className={
+              selected?.r === f.r || hovered?.r === f.r ? "active" : ""
+            }
+            style={{ cursor: "pointer" }}
             onMouseEnter={() => setHovered(f)}
             onMouseLeave={() => setHovered(null)}
             onClick={() => setSelected(selected?.r === f.r ? null : f)}
           >
-            <td style={styles.bodyCell}>{f.flight || "—"}</td>
-            <td style={styles.bodyCell}>{f.r || "—"}</td>
-            <td style={styles.bodyCell}>{f.desc || "—"}</td>
-            <td style={styles.bodyCell}>{f.distance} km</td>
-            <td style={styles.bodyCell}>{f.true_heading ?? f.track}°</td>
+            <td>{f.flight || "—"}</td>
+            <td>{f.r || "—"}</td>
+            <td>{f.desc || "—"}</td>
+            <td>{f.distance} km</td>
+            <td>{f.true_heading ?? f.track}°</td>
           </tr>
         ))}
       </tbody>

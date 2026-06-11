@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import type { Flight } from "../App";
 import type { FlightRoute } from "../App";
 import { decodeHTMLEntities } from "../utils/utils";
@@ -17,29 +16,6 @@ interface IProps {
   CANVAS_SIZE: number;
 }
 
-const styles: Record<string, CSSProperties> = {
-  wrap: {
-    position: "relative",
-    marginBottom: "12px",
-  },
-  canvas: {
-    border: "1px solid rgba(0, 180, 0, 0.4)",
-    borderRadius: "50%",
-    display: "block",
-  },
-  tooltip: {
-    position: "absolute",
-    background: "rgba(0, 20, 0, 0.9)",
-    border: "1px solid #00cc44",
-    padding: "8px 12px",
-    fontSize: "0.8rem",
-    lineHeight: 1.6,
-    pointerEvents: "none",
-    color: "#00ff66",
-    minWidth: "150px",
-  },
-};
-
 const RadarScreen: React.FC<IProps> = ({
   hovered,
   hoveredPos,
@@ -52,12 +28,12 @@ const RadarScreen: React.FC<IProps> = ({
   CANVAS_SIZE,
 }) => {
   return (
-    <div style={styles.wrap}>
+    <div className="radar-wrap">
       <canvas
         ref={canvasRef}
         width={CANVAS_SIZE}
         height={CANVAS_SIZE}
-        style={{ ...styles.canvas, cursor: hovered ? "pointer" : "crosshair" }}
+        style={{ cursor: hovered ? "pointer" : "default" }}
         onMouseMove={handleMouseMove}
         onClick={handleCanvasClick}
         onMouseLeave={() => {
@@ -83,8 +59,8 @@ const RadarScreen: React.FC<IProps> = ({
               : "";
           return (
             <div
+              className="tooltip"
               style={{
-                ...styles.tooltip,
                 ...(onRight
                   ? {
                       left: hoveredPos.x + offset,
