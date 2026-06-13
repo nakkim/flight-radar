@@ -11,31 +11,10 @@ import useWindowWidth from "./hooks/useWindowWidth";
 import useDrawRadar from "./hooks/useDrawRadar";
 import { SettingsIcon } from "./assets/icons";
 import InfoDialog from "./components/InfoDialog";
+import type { Flight } from "./types/types";
+import useAirports from "./hooks/useAirports";
 
 console.log(`App version: ${APP_VERSION}`);
-
-export interface Flight {
-  lat: number;
-  lon: number;
-  r: string;
-  desc: string;
-  flight: string | null;
-  distance: number;
-  heading: number;
-  mag_heading: number;
-  true_heading: number;
-  track: number;
-  alt_baro: number | "ground";
-  baro_rate: number;
-  ias: number;
-  tas: number;
-}
-
-export interface FlightRoute {
-  origin: string | null;
-  destination: string | null;
-  routeText: string | null;
-}
 
 const DEFAULT_LAT = localStorage.getItem("DEFAULT_LAT")
   ? parseFloat(localStorage.getItem("DEFAULT_LAT")!)
@@ -76,6 +55,7 @@ const App = () => {
   const hoveredRoute = useFlightRoute(hovered, selected);
   const coastlineSegments = useCoastlineSegments();
   const flightTrailRef = useFlightTrail(selected);
+  const airports = useAirports();
 
   const { flights, flightsRef, error, lastUpdate, refetch } = useFlights(
     centerLat,
@@ -188,6 +168,7 @@ const App = () => {
     RINGS,
     flightTrailRef,
     coastlineSegments,
+    airports,
     centerLat,
     centerLon,
   });

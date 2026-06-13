@@ -1,6 +1,6 @@
 import { useEffect, type RefObject } from "react";
-import type { Flight } from "../App";
 import { geoToCanvas } from "../utils/utils";
+import type { Airport, Flight } from "../types/types";
 
 interface UseDrawRadarParams {
   canvasRef: RefObject<HTMLCanvasElement | null>;
@@ -9,6 +9,7 @@ interface UseDrawRadarParams {
   selected: Flight | null;
   radius: number;
   coastlineSegments: [number, number][][];
+  airports: Airport[];
   centerLat: number;
   centerLon: number;
   CANVAS_SIZE: number;
@@ -24,6 +25,7 @@ const useDrawRadar = ({
   selected,
   radius,
   coastlineSegments,
+  airports,
   centerLat,
   centerLon,
   CANVAS_SIZE,
@@ -124,6 +126,31 @@ const useDrawRadar = ({
     ctx.fillStyle = "#cce64e";
     ctx.fill();
 
+    // Airport markers
+    airports.forEach((a) => {
+      const { x, y } = geoToCanvas(
+        a.latitude,
+        a.longitude,
+        centerLat,
+        centerLon,
+        radius,
+        cx,
+        cy,
+        RADAR_RADIUS
+      );
+      ctx.beginPath();
+      ctx.rect(x - 5, y - 5, 10, 10);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+      ctx.fill();
+
+      // Add icao code label if there's room
+      if (Math.hypot(x - cx, y - cy) < RADAR_RADIUS - 20) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.font = "10px monospace";
+        ctx.fillText(a.icao_code, x + 12, y + 4);
+      }
+    });
+
     // Draw selected flight trail
     if (selected) {
       const trail = flightTrailRef.current.get(selected.r);
@@ -206,6 +233,7 @@ const useDrawRadar = ({
       ctx.font = isHovered ? "bold 12px monospace" : "11px monospace";
       ctx.fillText(f.flight || f.r || "?", fx + 8, fy - 4);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     canvasRef,
     flights,

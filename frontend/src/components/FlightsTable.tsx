@@ -1,4 +1,4 @@
-import type { Flight } from "../App";
+import type { Flight } from "../types/types";
 import { getVerticalTrend } from "../utils/utils";
 
 interface IProps {

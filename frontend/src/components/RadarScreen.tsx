@@ -1,5 +1,4 @@
-import type { Flight } from "../App";
-import type { FlightRoute } from "../App";
+import type { Flight, FlightRoute } from "../types/types";
 import { decodeHTMLEntities, getVerticalTrend } from "../utils/utils";
 
 interface IProps {
