@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { POLL_INTERVAL_MS, type Flight } from "../App";
+import { POLL_INTERVAL_MS } from "../App";
+import type { Flight } from "../types/types";
 
 interface UseFlightsResult {
   flights: Flight[];

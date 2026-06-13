@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { Flight } from "../App";
+import type { Flight } from "../types/types";
 
 const MAX_TRAIL_POINTS = 120;
 

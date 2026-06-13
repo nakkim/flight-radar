@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import type { Flight, FlightRoute } from "../App";
+import type { Flight, FlightRoute } from "../types/types";
 
 const useFlightRoute = (
   hovered: Flight | null,
