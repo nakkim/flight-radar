@@ -1,3 +1,5 @@
+export type ThemeMode = "system" | "light" | "dark";
+
 export type Airport = {
   id: number;
   icao_code: string;

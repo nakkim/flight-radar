@@ -9,6 +9,7 @@ import useCoastlineSegments from "./hooks/useCoastLineSegments";
 import useFlights from "./hooks/useFlights";
 import useWindowWidth from "./hooks/useWindowWidth";
 import useDrawRadar from "./hooks/useDrawRadar";
+import useTheme from "./hooks/useTheme";
 import { SettingsIcon } from "./assets/icons";
 import InfoDialog from "./components/InfoDialog";
 import type { Flight } from "./types/types";
@@ -51,6 +52,8 @@ const App = () => {
   const [geoError, setGeoError] = useState<string | null>(null);
   const [showTable, setShowTable] = useState(SHOW_TABLE);
   const [showInfo, setShowInfo] = useState(false);
+
+  const { isDark, themeMode, setThemeMode } = useTheme();
 
   const hoveredRoute = useFlightRoute(hovered, selected);
   const coastlineSegments = useCoastlineSegments(centerLat, centerLon, radius);
@@ -156,6 +159,7 @@ const App = () => {
     airports,
     centerLat,
     centerLon,
+    darkMode: isDark,
   });
 
   const findFlightAtCursor = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -263,6 +267,8 @@ const App = () => {
           setDraftRadius={setDraftRadius}
           applySettings={applySettings}
           setShowSettings={setShowSettings}
+          themeMode={themeMode}
+          setThemeMode={setThemeMode}
         />
       )}
       <footer className="footer">

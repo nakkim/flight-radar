@@ -16,6 +16,7 @@ interface UseDrawRadarParams {
   RADAR_RADIUS: number;
   RINGS: number;
   flightTrailRef: RefObject<Map<string, [number, number][]>>;
+  darkMode: boolean;
 }
 
 const useDrawRadar = ({
@@ -32,6 +33,7 @@ const useDrawRadar = ({
   RADAR_RADIUS,
   RINGS,
   flightTrailRef,
+  darkMode,
 }: UseDrawRadarParams) => {
   // Draw radar
   useEffect(() => {
@@ -43,10 +45,46 @@ const useDrawRadar = ({
     const cx = CANVAS_SIZE / 2;
     const cy = CANVAS_SIZE / 2;
 
+    const c = darkMode
+      ? {
+          bg: "#020f02",
+          ring: "rgba(0, 180, 0, 0.3)",
+          ringLabel: "rgba(0, 180, 0, 0.5)",
+          crosshair: "rgba(0, 180, 0, 0.25)",
+          coast: "rgba(0, 200, 80, 0.55)",
+          cardinal: "rgba(0, 220, 0, 0.7)",
+          centerDot: "#cce64e",
+          airport: "rgba(255, 255, 255, 0.8)",
+          airportLabel: "rgba(255, 255, 255, 0.9)",
+          trail: "rgba(255, 255, 255, 0.75)",
+          flightAirborne: "#00ff44",
+          flightGround: "#ff4444",
+          flightHovered: "#ffffff",
+          label: "#00dd33",
+          labelHovered: "#ffffff",
+        }
+      : {
+          bg: "#eaf5ea",
+          ring: "rgba(0, 110, 40, 0.25)",
+          ringLabel: "rgba(0, 100, 30, 0.55)",
+          crosshair: "rgba(0, 100, 30, 0.2)",
+          coast: "rgba(0, 110, 40, 0.6)",
+          cardinal: "rgba(0, 110, 40, 0.75)",
+          centerDot: "#2d7a1a",
+          airport: "rgba(40, 40, 40, 0.8)",
+          airportLabel: "rgba(30, 30, 30, 0.9)",
+          trail: "rgba(20, 20, 20, 0.6)",
+          flightAirborne: "#006622",
+          flightGround: "#cc2200",
+          flightHovered: "#111111",
+          label: "#005522",
+          labelHovered: "#111111",
+        };
+
     ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
     // Background
-    ctx.fillStyle = "#020f02";
+    ctx.fillStyle = c.bg;
     ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
     // Rings
@@ -54,19 +92,19 @@ const useDrawRadar = ({
       const r = (RADAR_RADIUS / RINGS) * i;
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.strokeStyle = "rgba(0, 180, 0, 0.3)";
+      ctx.strokeStyle = c.ring;
       ctx.lineWidth = 1;
       ctx.stroke();
 
       // Ring label (distance)
       const ringKm = Math.round((radius / RINGS) * i);
-      ctx.fillStyle = "rgba(0, 180, 0, 0.5)";
+      ctx.fillStyle = c.ringLabel;
       ctx.font = "11px monospace";
       ctx.fillText(`${ringKm}km`, cx + 4, cy - r + 14);
     }
 
     // Cross-hairs
-    ctx.strokeStyle = "rgba(0, 180, 0, 0.25)";
+    ctx.strokeStyle = c.crosshair;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(cx, cy - RADAR_RADIUS);
@@ -82,7 +120,7 @@ const useDrawRadar = ({
     ctx.beginPath();
     ctx.arc(cx, cy, RADAR_RADIUS, 0, Math.PI * 2);
     ctx.clip();
-    ctx.strokeStyle = "rgba(0, 200, 80, 0.55)";
+    ctx.strokeStyle = c.coast;
     ctx.lineWidth = 1;
     for (const segment of coastlineSegments) {
       if (segment.length < 2) continue;
@@ -109,7 +147,7 @@ const useDrawRadar = ({
     ctx.restore();
 
     // Cardinal labels
-    ctx.fillStyle = "rgba(0, 220, 0, 0.7)";
+    ctx.fillStyle = c.cardinal;
     ctx.font = "13px monospace";
     ctx.textAlign = "center";
     ctx.fillText("N", cx, cy - RADAR_RADIUS - 6);
@@ -123,7 +161,7 @@ const useDrawRadar = ({
     // Center dot
     ctx.beginPath();
     ctx.rect(cx - 5, cy - 5, 10, 10);
-    ctx.fillStyle = "#cce64e";
+    ctx.fillStyle = c.centerDot;
     ctx.fill();
 
     // Airport markers
@@ -140,12 +178,12 @@ const useDrawRadar = ({
       );
       ctx.beginPath();
       ctx.rect(x - 5, y - 5, 10, 10);
-      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+      ctx.fillStyle = c.airport;
       ctx.fill();
 
       // Add icao code label if there's room
       if (Math.hypot(x - cx, y - cy) < RADAR_RADIUS - 20) {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fillStyle = c.airportLabel;
         ctx.font = "10px monospace";
         ctx.fillText(a.icao_code, x + 12, y + 4);
       }
@@ -159,7 +197,7 @@ const useDrawRadar = ({
         ctx.beginPath();
         ctx.arc(cx, cy, RADAR_RADIUS, 0, Math.PI * 2);
         ctx.clip();
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
+        ctx.strokeStyle = c.trail;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         let trailStarted = false;
@@ -195,7 +233,11 @@ const useDrawRadar = ({
 
       const isHovered = hovered?.r === f.r || selected?.r === f.r;
       const isAirborne = typeof f.alt_baro === "number";
-      const color = isHovered ? "#ffffff" : isAirborne ? "#00ff44" : "#ff4444";
+      const color = isHovered
+        ? c.flightHovered
+        : isAirborne
+          ? c.flightAirborne
+          : c.flightGround;
       const scale = isHovered ? 1.4 : 1;
 
       // Aircraft symbol rotated to true heading
@@ -229,7 +271,7 @@ const useDrawRadar = ({
       ctx.restore();
 
       // Label
-      ctx.fillStyle = isHovered ? "#ffffff" : "#00dd33";
+      ctx.fillStyle = isHovered ? c.labelHovered : c.label;
       ctx.font = isHovered ? "bold 12px monospace" : "11px monospace";
       ctx.fillText(f.flight || f.r || "?", fx + 8, fy - 4);
     });
@@ -247,6 +289,7 @@ const useDrawRadar = ({
     CANVAS_SIZE,
     RADAR_RADIUS,
     RINGS,
+    darkMode,
   ]);
 };
 
