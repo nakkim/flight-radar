@@ -1,6 +1,7 @@
 import React from "react";
 import "../App.css";
 import { SettingsIcon } from "../assets/icons";
+import type { ThemeMode } from "../types/types";
 
 interface IProps {
   locate: () => void;
@@ -14,6 +15,8 @@ interface IProps {
   setDraftRadius: (radius: number) => void;
   setShowSettings: (show: boolean) => void;
   applySettings: () => void;
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
 }
 
 const SettingsDialog: React.FC<IProps> = ({
@@ -28,6 +31,8 @@ const SettingsDialog: React.FC<IProps> = ({
   setDraftRadius,
   setShowSettings,
   applySettings,
+  themeMode,
+  setThemeMode,
 }) => {
   return (
     <div className="dialog-overlay" onClick={() => setShowSettings(false)}>
@@ -83,7 +88,26 @@ const SettingsDialog: React.FC<IProps> = ({
           </div>
         </div>
 
+        <div className="dialog-section">
+          <label>Theme</label>
+          <div className="theme-segment">
+            {(["system", "light", "dark"] as ThemeMode[]).map((mode) => (
+              <button
+                key={mode}
+                className={`theme-seg-btn${
+                  themeMode === mode ? " active" : ""
+                }`}
+                onClick={() => setThemeMode(mode)}
+              >
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {geoError && <p className="error dialog-error">{geoError}</p>}
+
+        <hr className="info-divider" />
 
         <div className="dialog-actions">
           <button className="radar-btn" onClick={() => setShowSettings(false)}>
