@@ -53,7 +53,7 @@ const App = () => {
   const [showInfo, setShowInfo] = useState(false);
 
   const hoveredRoute = useFlightRoute(hovered, selected);
-  const coastlineSegments = useCoastlineSegments();
+  const coastlineSegments = useCoastlineSegments(centerLat, centerLon, radius);
   const flightTrailRef = useFlightTrail(selected);
   const airports = useAirports();
 
