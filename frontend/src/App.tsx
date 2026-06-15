@@ -98,20 +98,20 @@ const App = () => {
     selectedRef.current = selected;
   }, [selected]);
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      if (mounted) await refetch();
-    })();
-    const interval = setInterval(() => {
-      if (mounted) refetch();
-    }, POLL_INTERVAL_MS);
-    return () => {
-      mounted = false;
-      clearInterval(interval);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [centerLat, centerLon, radius]);
+  // useEffect(() => {
+  //   let mounted = true;
+  //   (async () => {
+  //     if (mounted) await refetch();
+  //   })();
+  //   const interval = setInterval(() => {
+  //     if (mounted) refetch();
+  //   }, POLL_INTERVAL_MS);
+  //   return () => {
+  //     mounted = false;
+  //     clearInterval(interval);
+  //   };
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [centerLat, centerLon, radius]);
 
   const openSettings = () => {
     setDraftLat(String(centerLat));
